@@ -11,6 +11,6 @@ Büyü Fısıltısı, Unity (C#) ile geliştirilen 3D bir orman macerasıdır. O
 
 - Unity 6.3 LTS (6000.3.25f1), Universal 3D (URP)
 - AI Navigation, Input System, TextMeshPro, Test Framework
-- Ollama (yerel LLM)
+- Ollama (yerel LLM), model: `gemma2:2b` ([seçim notu](Docs/model_secimi.md))
 
 > Bu belge proje ilerledikçe ayrıntılı rapora dönüştürülecektir.
