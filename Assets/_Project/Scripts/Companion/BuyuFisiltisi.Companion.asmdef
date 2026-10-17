@@ -1,0 +1,14 @@
+{
+    "name": "BuyuFisiltisi.Companion",
+    "rootNamespace": "BuyuFisiltisi.Companion",
+    "references": ["BuyuFisiltisi.Core", "Unity.AI.Navigation"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
