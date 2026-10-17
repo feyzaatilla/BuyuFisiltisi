@@ -1,0 +1,14 @@
+{
+    "name": "BuyuFisiltisi.Editor",
+    "rootNamespace": "BuyuFisiltisi.EditorTools",
+    "references": ["BuyuFisiltisi.Core", "BuyuFisiltisi.Companion", "BuyuFisiltisi.Gameplay", "BuyuFisiltisi.Bootstrap", "Unity.AI.Navigation"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
