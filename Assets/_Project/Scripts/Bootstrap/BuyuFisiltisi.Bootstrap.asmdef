@@ -1,0 +1,14 @@
+{
+    "name": "BuyuFisiltisi.Bootstrap",
+    "rootNamespace": "BuyuFisiltisi.Bootstrap",
+    "references": ["BuyuFisiltisi.Core", "BuyuFisiltisi.Companion", "BuyuFisiltisi.LLM", "BuyuFisiltisi.Gameplay", "BuyuFisiltisi.UI", "Unity.AI.Navigation"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
