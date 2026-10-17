@@ -1,0 +1,14 @@
+{
+    "name": "BuyuFisiltisi.Gameplay",
+    "rootNamespace": "BuyuFisiltisi.Gameplay",
+    "references": ["BuyuFisiltisi.Core", "Unity.AI.Navigation", "Unity.InputSystem"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
