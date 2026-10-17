@@ -1,0 +1,14 @@
+{
+    "name": "BuyuFisiltisi.Testing",
+    "rootNamespace": "BuyuFisiltisi.Testing",
+    "references": ["BuyuFisiltisi.Core", "BuyuFisiltisi.Companion"],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
