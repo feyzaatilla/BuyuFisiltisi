@@ -6,7 +6,8 @@
         "UnityEditor.TestRunner",
         "BuyuFisiltisi.Core",
         "BuyuFisiltisi.Companion",
-        "BuyuFisiltisi.LLM"
+        "BuyuFisiltisi.LLM",
+        "BuyuFisiltisi.Gameplay"
     ],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
