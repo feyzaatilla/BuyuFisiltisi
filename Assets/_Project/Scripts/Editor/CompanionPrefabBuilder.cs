@@ -1,3 +1,4 @@
+using BuyuFisiltisi.Companion.Brain;
 using BuyuFisiltisi.Companion.Movement;
 using BuyuFisiltisi.Core.Navigation;
 using UnityEditor;
@@ -40,6 +41,7 @@ namespace BuyuFisiltisi.EditorTools
             agent.obstacleAvoidanceType = ObstacleAvoidanceType.LowQualityObstacleAvoidance;
 
             root.AddComponent<CompanionMover>();
+            root.AddComponent<CompanionController>();
 
             var book = GameObject.CreatePrimitive(PrimitiveType.Cube);
             book.name = "Fisil_Kitap";
