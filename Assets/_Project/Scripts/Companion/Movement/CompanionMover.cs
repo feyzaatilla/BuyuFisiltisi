@@ -19,6 +19,7 @@ namespace BuyuFisiltisi.Companion.Movement
 
         public bool IsFollowing => followTarget != null;
         public float FollowDistance => followDistance;
+        public float CurrentSpeed => agent != null && agent.isOnNavMesh ? agent.velocity.magnitude : 0f;
 
         public bool HasArrived =>
             agent != null && agent.isOnNavMesh && !agent.pathPending &&

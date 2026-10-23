@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 7471172962120040781}
   - component: {fileID: 2096464552451708859}
   - component: {fileID: 3830878938239715993}
+  - component: {fileID: 5299019064803402908}
   m_Layer: 8
   m_Name: Fisil
   m_TagString: Untagged
@@ -163,3 +164,21 @@ MonoBehaviour:
   arriveTolerance: 0.2
   repathInterval: 0.25
   sampleRadius: 1
+--- !u!114 &5299019064803402908
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8989169454737189501}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cb64ba64d9b44292b6c1496f1adc7b94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BuyuFisiltisi.Companion::BuyuFisiltisi.Companion.Brain.CompanionController
+  player: {fileID: 0}
+  taskTimeout: 20
+  followOnStart: 1
+  stuckSettings:
+    SpeedThreshold: 0.05
+    TimeThreshold: 1.5
