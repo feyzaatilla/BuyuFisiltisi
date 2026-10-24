@@ -10,6 +10,8 @@
 *.unity     text
 *.prefab    text
 *.asset     text
+NavMesh*.asset binary
+LightingData.asset binary
 *.mat       text
 *.anim      text
 *.controller text
