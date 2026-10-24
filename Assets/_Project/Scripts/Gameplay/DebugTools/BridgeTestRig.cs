@@ -16,6 +16,7 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
         [SerializeField] private NavMeshSurface _surface;
         [SerializeField] private NavMeshAgent _walker;
         [SerializeField] private Transform _walkerGoal;
+        [SerializeField] private ManualWalker _manualWalker;
 
         private EventBus _eventBus;
         private string _switchStatus = "Bekliyor";
@@ -41,7 +42,11 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
                 _surface.BuildNavMesh();
 
             if (_walker != null)
+            {
+                if (_manualWalker == null && !_walker.TryGetComponent(out _manualWalker))
+                    _manualWalker = _walker.gameObject.AddComponent<ManualWalker>();
                 _walker.gameObject.SetActive(true);
+            }
         }
 
         private void Update()
@@ -53,9 +58,11 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
             if (keyboard.bKey.wasPressedThisFrame && _switch.CanInteract(gameObject))
                 _switch.Interact(gameObject);
 
-            if (_walker != null && _walker.isOnNavMesh && _walker.hasPath && !_walker.pathPending &&
-                _walker.remainingDistance <= _walker.stoppingDistance + 0.1f)
+            if (_walker != null && _walkerGoal != null && _walker.isOnNavMesh &&
+                Vector3.Distance(_walker.transform.position, _walkerGoal.position) <= 2f)
                 _walkerStatus = "Karşıya geçti";
+            else if (_manualWalker != null && _manualWalker.IsMoving)
+                _walkerStatus = "Sen yürütüyorsun";
         }
 
         private void OnSwitchPulled(SwitchPulledEvent gameEvent)
@@ -67,6 +74,12 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
         private void OnBridgeLowered(BridgeLoweredEvent gameEvent)
         {
             _bridgeStatus = "İndi, NavMesh güncellendi";
+            if (_manualWalker != null && _manualWalker.enabled)
+            {
+                _walkerStatus = "Köprü açık, karşıya sen geç";
+                return;
+            }
+
             if (_walker != null && _walkerGoal != null)
                 StartCoroutine(SendWalker());
         }
@@ -97,8 +110,10 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
 
         private void OnGUI()
         {
-            GUILayout.BeginArea(new Rect(20, 20, 380, 150), GUI.skin.box);
+            GUILayout.BeginArea(new Rect(20, 20, 380, 170), GUI.skin.box);
             GUILayout.Label("B tuşu: şalteri çek");
+            if (_manualWalker != null && _manualWalker.enabled)
+                GUILayout.Label("WASD / ok tuşları: yürü");
             GUILayout.Label("Şalter: " + _switchStatus);
             GUILayout.Label("Köprü: " + _bridgeStatus);
             GUILayout.Label("Yürüyücü: " + _walkerStatus);
