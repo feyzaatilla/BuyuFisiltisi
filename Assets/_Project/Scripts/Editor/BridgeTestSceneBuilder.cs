@@ -94,6 +94,7 @@ namespace BuyuFisiltisi.EditorTools
             agent.height = AgentTypes.Cadi.Height;
             agent.baseOffset = 1f;
             agent.speed = 3.5f;
+            var manualWalker = walker.AddComponent<ManualWalker>();
             walker.SetActive(false);
 
             var goal = new GameObject("Hedef").transform;
@@ -105,6 +106,7 @@ namespace BuyuFisiltisi.EditorTools
             rigData.FindProperty("_surface").objectReferenceValue = surface;
             rigData.FindProperty("_walker").objectReferenceValue = agent;
             rigData.FindProperty("_walkerGoal").objectReferenceValue = goal;
+            rigData.FindProperty("_manualWalker").objectReferenceValue = manualWalker;
             rigData.ApplyModifiedPropertiesWithoutUndo();
 
             var camera = Camera.main;

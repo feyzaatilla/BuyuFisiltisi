@@ -499,6 +499,7 @@ MonoBehaviour:
   _surface: {fileID: 1592956464}
   _walker: {fileID: 2081351711}
   _walkerGoal: {fileID: 138888337}
+  _manualWalker: {fileID: 2081351716}
 --- !u!4 &555937316
 Transform:
   m_ObjectHideFlags: 0
@@ -1292,6 +1293,7 @@ GameObject:
   - component: {fileID: 2081351713}
   - component: {fileID: 2081351712}
   - component: {fileID: 2081351711}
+  - component: {fileID: 2081351716}
   m_Layer: 7
   m_Name: Yuruyucu
   m_TagString: Untagged
@@ -1299,6 +1301,20 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 0
+--- !u!114 &2081351716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2081351710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f63be84b477d91242b76d20d2621824d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BuyuFisiltisi.Gameplay::BuyuFisiltisi.Gameplay.DebugTools.ManualWalker
+  _speed: 4
+  _turnSpeed: 720
 --- !u!195 &2081351711
 NavMeshAgent:
   m_ObjectHideFlags: 0
