@@ -17,6 +17,9 @@ namespace BuyuFisiltisi.EditorTools
         [MenuItem("Büyü Fısıltısı/Köprü Test Sahnesini Kur")]
         public static void Build()
         {
+            if (EditModeRunner.RunInEditMode(Build))
+                return;
+
             if (!TryFindAgentType(AgentTypes.Cadi.Name, out var cadiId))
             {
                 EditorUtility.DisplayDialog("Köprü Testi", $"'{AgentTypes.Cadi.Name}' Agent Type bulunamadı. Önce Proje Kurulum Kontrolü'nü çalıştır.", "Tamam");
