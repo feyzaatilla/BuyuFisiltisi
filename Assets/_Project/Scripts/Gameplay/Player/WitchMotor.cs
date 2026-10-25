@@ -23,7 +23,13 @@ namespace BuyuFisiltisi.Gameplay.Player
 
         private void Awake()
         {
-            _controller = GetComponent<CharacterController>();
+            EnsureReady();
+        }
+
+        private void EnsureReady()
+        {
+            if (_controller == null)
+                _controller = GetComponent<CharacterController>();
             _input ??= new KeyboardMousePlayerInput();
             if (_cameraTransform == null && Camera.main != null)
                 _cameraTransform = Camera.main.transform;
@@ -41,6 +47,7 @@ namespace BuyuFisiltisi.Gameplay.Player
 
         private void Update()
         {
+            EnsureReady();
             var cameraForward = _cameraTransform != null ? _cameraTransform.forward : Vector3.forward;
             var direction = MovementMath.CameraRelative(_input.Move, cameraForward);
             var grounded = _controller.isGrounded;
@@ -62,6 +69,7 @@ namespace BuyuFisiltisi.Gameplay.Player
 
         public void Respawn(Vector3 position, Quaternion rotation)
         {
+            EnsureReady();
             _controller.enabled = false;
             transform.SetPositionAndRotation(position, rotation);
             _verticalSpeed = 0f;

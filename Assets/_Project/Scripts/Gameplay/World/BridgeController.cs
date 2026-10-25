@@ -76,8 +76,14 @@ namespace BuyuFisiltisi.Gameplay.World
             var operations = new List<AsyncOperation>();
             foreach (var surface in _surfaces)
             {
-                if (surface != null && surface.navMeshData != null)
-                    operations.Add(surface.UpdateNavMesh(surface.navMeshData));
+                if (surface == null || surface.navMeshData == null)
+                    continue;
+
+                var data = Instantiate(surface.navMeshData);
+                surface.RemoveData();
+                surface.navMeshData = data;
+                surface.AddData();
+                operations.Add(surface.UpdateNavMesh(data));
             }
 
             foreach (var operation in operations)

@@ -1,4 +1,6 @@
+using BuyuFisiltisi.Companion.Barks;
 using BuyuFisiltisi.Companion.Brain;
+using BuyuFisiltisi.Companion.Visual;
 using BuyuFisiltisi.Core.Navigation;
 using BuyuFisiltisi.Gameplay.Commands;
 using BuyuFisiltisi.Gameplay.DebugTools;
@@ -115,6 +117,10 @@ namespace BuyuFisiltisi.EditorTools
             fisil.name = "Fisil";
             fisil.transform.position = new Vector3(1.5f, 0f, -1.5f);
             new SerializedObject(fisil.GetComponent<CompanionController>()).Apply("player", witch.transform);
+            fisil.AddComponent<CompanionBarker>();
+            var book = fisil.transform.Find("Fisil_Kitap");
+            if (book != null)
+                book.gameObject.AddComponent<HoverVisual>();
             fisil.SetActive(false);
 
             var commands = new GameObject("FisilEmirleri").AddComponent<CompanionCommandKeyboardInput>();
@@ -129,6 +135,7 @@ namespace BuyuFisiltisi.EditorTools
             activate.arraySize = 1;
             activate.GetArrayElementAtIndex(0).objectReferenceValue = fisil;
             rigData.FindProperty("_commandInput").objectReferenceValue = commands;
+            rigData.FindProperty("_companion").objectReferenceValue = fisil.transform;
             rigData.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.SaveScene(scene, ScenePath);
