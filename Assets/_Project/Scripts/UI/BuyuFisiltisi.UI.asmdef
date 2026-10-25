@@ -1,7 +1,7 @@
 {
     "name": "BuyuFisiltisi.UI",
     "rootNamespace": "BuyuFisiltisi.UI",
-    "references": ["BuyuFisiltisi.Core", "Unity.TextMeshPro", "UnityEngine.UI"],
+    "references": ["BuyuFisiltisi.Core", "Unity.TextMeshPro", "UnityEngine.UI", "BuyuFisiltisi.LLM", "Unity.InputSystem"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

@@ -7,7 +7,8 @@
         "BuyuFisiltisi.Core",
         "BuyuFisiltisi.Companion",
         "BuyuFisiltisi.LLM",
-        "BuyuFisiltisi.Gameplay"
+        "BuyuFisiltisi.Gameplay",
+        "BuyuFisiltisi.UI"
     ],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
