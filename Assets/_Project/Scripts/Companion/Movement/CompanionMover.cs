@@ -12,10 +12,12 @@ namespace BuyuFisiltisi.Companion.Movement
         [SerializeField] private float arriveTolerance = 0.2f;
         [SerializeField] private float repathInterval = 0.25f;
         [SerializeField] private float sampleRadius = 1f;
+        [SerializeField] private float followSampleRadius = 3f;
 
         private NavMeshAgent agent;
         private Transform followTarget;
         private float nextRepathTime;
+        private bool followWarned;
 
         public bool IsFollowing => followTarget != null;
         public float FollowDistance => followDistance;
@@ -47,13 +49,14 @@ namespace BuyuFisiltisi.Companion.Movement
         public bool MoveTo(Vector3 destination)
         {
             followTarget = null;
-            return SetDestination(destination);
+            return SetDestination(destination, sampleRadius);
         }
 
         public void Follow(Transform target)
         {
             followTarget = target;
             nextRepathTime = 0f;
+            followWarned = false;
         }
 
         public void Stop()
@@ -73,17 +76,33 @@ namespace BuyuFisiltisi.Companion.Movement
 
             nextRepathTime = Time.time + repathInterval;
             var goal = FollowPoint.Calculate(followTarget.position, transform.position, followDistance);
-            if (!agent.hasPath || (goal - agent.destination).sqrMagnitude > 0.04f)
-                SetDestination(goal);
+            if (agent.hasPath && FollowPoint.IsWithin(goal, agent.destination, 0.2f))
+            {
+                if (!followWarned && !agent.pathPending && agent.pathStatus != NavMeshPathStatus.PathComplete)
+                {
+                    followWarned = true;
+                    Debug.LogWarning($"[Fısıl] Takip yolu tamamlanamıyor ({agent.pathStatus}). Hedef: {goal}", this);
+                }
+                return;
+            }
+
+            if (SetDestination(goal, followSampleRadius))
+                return;
+
+            if (!followWarned)
+            {
+                followWarned = true;
+                Debug.LogWarning($"[Fısıl] Takip noktası NavMesh'te bulunamadı. Hedef: {goal}, Fısıl: {transform.position}, NavMesh üzerinde: {agent.isOnNavMesh}", this);
+            }
         }
 
-        private bool SetDestination(Vector3 destination)
+        private bool SetDestination(Vector3 destination, float radius)
         {
             if (agent == null || !agent.isOnNavMesh)
                 return false;
 
             var filter = new NavMeshQueryFilter { agentTypeID = agent.agentTypeID, areaMask = agent.areaMask };
-            if (!NavMesh.SamplePosition(destination, out var hit, sampleRadius, filter))
+            if (!NavMesh.SamplePosition(destination, out var hit, radius, filter))
                 return false;
 
             agent.isStopped = false;
