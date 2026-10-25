@@ -13,11 +13,16 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
         [SerializeField] private NavMeshSurface[] _surfaces = new NavMeshSurface[0];
         [SerializeField] private GameObject[] _activateAfterBake = new GameObject[0];
         [SerializeField] private CompanionCommandKeyboardInput _commandInput;
+        [SerializeField] private Transform _companion;
+        [SerializeField] private float _barkDuration = 3f;
 
         private EventBus _eventBus;
         private string _companionState = "Bekliyor";
         private string _lastTask = "Yok";
         private string _bridgeStatus = "Kalkık";
+        private string _bark;
+        private float _barkUntil;
+        private GUIStyle _bubbleStyle;
 
         private void Awake()
         {
@@ -26,6 +31,7 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
             _eventBus.Subscribe<CompanionTaskFinishedEvent>(OnCompanionTaskFinished);
             _eventBus.Subscribe<SwitchPulledEvent>(OnSwitchPulled);
             _eventBus.Subscribe<BridgeLoweredEvent>(OnBridgeLowered);
+            _eventBus.Subscribe<CompanionBarkEvent>(OnCompanionBark);
 
             var behaviours = FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
@@ -87,8 +93,16 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
             _bridgeStatus = "İndi, karşıya geçebilirsin";
         }
 
+        private void OnCompanionBark(CompanionBarkEvent gameEvent)
+        {
+            _bark = gameEvent.Text;
+            _barkUntil = Time.time + _barkDuration;
+        }
+
         private void OnGUI()
         {
+            DrawBubble();
+
             GUILayout.BeginArea(new Rect(20, 20, 430, 190), GUI.skin.box);
             GUILayout.Label("WASD / oklar: yürü   Shift: koş   Space: zıpla");
             GUILayout.Label("Sağ tık basılı + fare: kamerayı çevir   Tekerlek: yakınlaş");
@@ -98,6 +112,21 @@ namespace BuyuFisiltisi.Gameplay.DebugTools
             GUILayout.Label("Son görev: " + _lastTask);
             GUILayout.Label("Köprü: " + _bridgeStatus);
             GUILayout.EndArea();
+        }
+
+        private void DrawBubble()
+        {
+            if (string.IsNullOrEmpty(_bark) || Time.time > _barkUntil || _companion == null || Camera.main == null)
+                return;
+
+            var screen = Camera.main.WorldToScreenPoint(_companion.position + Vector3.up * 1.8f);
+            if (screen.z <= 0f)
+                return;
+
+            _bubbleStyle ??= new GUIStyle(GUI.skin.box) { wordWrap = true, fontSize = 14, alignment = TextAnchor.MiddleCenter };
+            var size = new Vector2(260f, 56f);
+            var rect = new Rect(screen.x - size.x * 0.5f, Screen.height - screen.y - size.y, size.x, size.y);
+            GUI.Box(rect, _bark, _bubbleStyle);
         }
     }
 }

@@ -24,7 +24,12 @@ namespace BuyuFisiltisi.Gameplay.Player
 
         private void Awake()
         {
-            _rig = new OrbitRig(_startYaw, _startPitch, _startDistance, _minPitch, _maxPitch, _minDistance, _maxDistance);
+            EnsureReady();
+        }
+
+        private void EnsureReady()
+        {
+            _rig ??= new OrbitRig(_startYaw, _startPitch, _startDistance, _minPitch, _maxPitch, _minDistance, _maxDistance);
             _input ??= new KeyboardMousePlayerInput();
         }
 
@@ -42,6 +47,8 @@ namespace BuyuFisiltisi.Gameplay.Player
         {
             if (_target == null)
                 return;
+
+            EnsureReady();
 
             if (_input.IsLooking)
             {
