@@ -21,7 +21,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (keyboard == null || _receiver == null || _firefly == null)
                 return;
 
-            if (!keyboard.gKey.wasPressedThisFrame)
+            if (!keyboard.hKey.wasPressedThisFrame)
                 return;
 
             if (_firefly.CanInteract(gameObject))
