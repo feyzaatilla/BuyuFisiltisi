@@ -1,3 +1,4 @@
+using BuyuFisiltisi.Gameplay.Forest;
 using BuyuFisiltisi.Gameplay.Items;
 using Unity.AI.Navigation;
 using UnityEditor;
@@ -60,15 +61,21 @@ namespace BuyuFisiltisi.EditorTools
                 list.GetArrayElementAtIndex(i).objectReferenceValue = flowers[i];
             inputData.ApplyModifiedPropertiesWithoutUndo();
 
+            CreateForest(inventory, material);
+
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log($"[Çiçek] {flowers.Length} çiçek ve çanta {scene.name} sahnesine eklendi. Play'e bas, V ve T tuşlarını dene.");
+            Debug.Log($"[Çiçek] {flowers.Length} çiçek ve çanta {scene.name} sahnesine eklendi. Play'e bas, V, T ve H tuşlarını dene.");
         }
 
         private static void Clear(GameObject witch)
         {
             DestroyNamed("Ciceker");
             DestroyNamed("CicekEmri");
+            DestroyNamed("AtesBocegi");
+            DestroyNamed("AtesBocegiEmri");
+            DestroyNamed("OrmanIsigi");
+            DestroyNamed("KaranlikPerde");
 
             var brew = witch.GetComponent<BrewKeyboardInput>();
             if (brew != null)
@@ -81,6 +88,64 @@ namespace BuyuFisiltisi.EditorTools
             var inventory = witch.GetComponent<PlayerInventory>();
             if (inventory != null)
                 Object.DestroyImmediate(inventory);
+        }
+
+        private static void CreateForest(PlayerInventory inventory, Material material)
+        {
+            var position = new Vector3(2f, 0.8f, 19f);
+
+            var fireflyObject = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            fireflyObject.name = "AtesBocegi";
+            fireflyObject.transform.position = position;
+            fireflyObject.transform.localScale = Vector3.one * 0.4f;
+            Object.DestroyImmediate(fireflyObject.GetComponent<SphereCollider>());
+            fireflyObject.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            if (material != null)
+                fireflyObject.GetComponent<Renderer>().sharedMaterial = material;
+
+            var point = new GameObject("DurmaNoktasi").transform;
+            point.SetParent(fireflyObject.transform, false);
+            point.position = new Vector3(position.x, 0f, position.z);
+
+            var firefly = fireflyObject.AddComponent<Firefly>();
+            var fireflyData = new SerializedObject(firefly);
+            fireflyData.FindProperty("_inventory").objectReferenceValue = inventory;
+            fireflyData.FindProperty("_interactionPoint").objectReferenceValue = point;
+            fireflyData.ApplyModifiedPropertiesWithoutUndo();
+
+            var curtain = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            curtain.name = "KaranlikPerde";
+            curtain.transform.position = new Vector3(0f, 1.5f, 28f);
+            curtain.transform.localScale = new Vector3(10f, 3f, 0.5f);
+            Object.DestroyImmediate(curtain.GetComponent<BoxCollider>());
+            curtain.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            if (material != null)
+                curtain.GetComponent<Renderer>().sharedMaterial = material;
+
+            var forestLight = new GameObject("OrmanIsigi");
+            var lightObject = new GameObject("KaranlikIsik");
+            lightObject.transform.SetParent(forestLight.transform, false);
+            lightObject.transform.position = new Vector3(0f, 4f, 24f);
+            var light = lightObject.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.9f, 0.5f);
+            light.intensity = 40f;
+            light.range = 25f;
+
+            var controller = forestLight.AddComponent<ForestLightController>();
+            var controllerData = new SerializedObject(controller);
+            var lights = controllerData.FindProperty("_lights");
+            lights.arraySize = 1;
+            lights.GetArrayElementAtIndex(0).objectReferenceValue = light;
+            var darkness = controllerData.FindProperty("_darknessObjects");
+            darkness.arraySize = 1;
+            darkness.GetArrayElementAtIndex(0).objectReferenceValue = curtain;
+            controllerData.ApplyModifiedPropertiesWithoutUndo();
+
+            var input = new GameObject("AtesBocegiEmri").AddComponent<FireflyKeyboardInput>();
+            var inputData = new SerializedObject(input);
+            inputData.FindProperty("_firefly").objectReferenceValue = firefly;
+            inputData.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void DestroyNamed(string objectName)
