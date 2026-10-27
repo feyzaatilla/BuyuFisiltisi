@@ -43,6 +43,7 @@ namespace BuyuFisiltisi.EditorTools
 
             var inventory = witch.AddComponent<PlayerInventory>();
             witch.AddComponent<InventoryHud>();
+            witch.AddComponent<BrewKeyboardInput>();
 
             var material = AssetDatabase.LoadAssetAtPath<Material>(MaterialPath);
             var root = new GameObject("Ciceker").transform;
@@ -61,7 +62,7 @@ namespace BuyuFisiltisi.EditorTools
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log($"[Çiçek] {flowers.Length} çiçek ve çanta {scene.name} sahnesine eklendi. Play'e bas, V tuşuna bas.");
+            Debug.Log($"[Çiçek] {flowers.Length} çiçek ve çanta {scene.name} sahnesine eklendi. Play'e bas, V ve T tuşlarını dene.");
         }
 
         private static void Clear(GameObject witch)
@@ -69,13 +70,17 @@ namespace BuyuFisiltisi.EditorTools
             DestroyNamed("Ciceker");
             DestroyNamed("CicekEmri");
 
-            var inventory = witch.GetComponent<PlayerInventory>();
-            if (inventory != null)
-                Object.DestroyImmediate(inventory);
+            var brew = witch.GetComponent<BrewKeyboardInput>();
+            if (brew != null)
+                Object.DestroyImmediate(brew);
 
             var hud = witch.GetComponent<InventoryHud>();
             if (hud != null)
                 Object.DestroyImmediate(hud);
+
+            var inventory = witch.GetComponent<PlayerInventory>();
+            if (inventory != null)
+                Object.DestroyImmediate(inventory);
         }
 
         private static void DestroyNamed(string objectName)
