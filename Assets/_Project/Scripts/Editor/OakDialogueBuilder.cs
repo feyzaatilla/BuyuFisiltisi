@@ -39,7 +39,7 @@ namespace BuyuFisiltisi.EditorTools
                 return;
             }
 
-            var oak = Find("_Characters/YasliMese");
+            var oak = Find("_Characters/YasliMese/YasliMese_Govde") ?? Find("_Characters/YasliMese");
             var witch = Find("_Characters/Cadi/Cadi_Govde");
             var systems = Find("_Systems");
             var ui = Find("_UI");
