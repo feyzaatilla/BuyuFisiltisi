@@ -1,5 +1,6 @@
 using BuyuFisiltisi.Gameplay.Forest;
 using BuyuFisiltisi.Gameplay.Items;
+using BuyuFisiltisi.Gameplay.World;
 using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -19,9 +20,11 @@ namespace BuyuFisiltisi.EditorTools
         {
             new Vector3(-4f, 0.4f, 38f),
             new Vector3(3f, 0.4f, 42f),
-            new Vector3(-3f, 0.4f, 47f),
-            new Vector3(4f, 0.4f, 51f)
+            new Vector3(0f, 0.4f, 52f)
         };
+
+        private const int HiddenFlowerIndex = 2;
+        private static readonly Vector3 FlameRespawn = new Vector3(0f, 0.1f, 46f);
 
         private static readonly Vector3 FireflyPosition = new Vector3(2f, 0.8f, 60f);
         private static readonly Vector3 LightPosition = new Vector3(0f, 4f, 76f);
@@ -59,14 +62,24 @@ namespace BuyuFisiltisi.EditorTools
             for (var i = 0; i < FlowerPositions.Length; i++)
                 flowers[i] = CreateFlower(root, i, inventory, material);
 
+            flowers[HiddenFlowerIndex].gameObject.AddComponent<FlowerPickupOnTouch>();
+            CreateFlames(root, FlowerPositions[HiddenFlowerIndex], material);
+
+            var reachable = new CollectibleFlower[HiddenFlowerIndex];
+            for (var i = 0; i < reachable.Length; i++)
+                reachable[i] = flowers[i];
+
             var fetch = new GameObject("CicekEmri").AddComponent<FlowerFetchKeyboardInput>();
             fetch.transform.SetParent(root, false);
             var fetchData = new SerializedObject(fetch);
             var list = fetchData.FindProperty("_flowers");
-            list.arraySize = flowers.Length;
-            for (var i = 0; i < flowers.Length; i++)
-                list.GetArrayElementAtIndex(i).objectReferenceValue = flowers[i];
+            list.arraySize = reachable.Length;
+            for (var i = 0; i < reachable.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = reachable[i];
             fetchData.ApplyModifiedPropertiesWithoutUndo();
+
+            new GameObject("GorevRehberi").transform.SetParent(root, false);
+            root.Find("GorevRehberi").gameObject.AddComponent<QuestTracker>();
 
             var firefly = CreateFirefly(root, inventory, material);
             CreateForestLight(root);
@@ -128,6 +141,38 @@ namespace BuyuFisiltisi.EditorTools
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();
             return flower;
+        }
+
+        private static void CreateFlames(Transform root, Vector3 center, Material material)
+        {
+            var flames = new GameObject("AlevHalkasi").transform;
+            flames.SetParent(root, false);
+
+            var respawn = new GameObject("AlevDonusNoktasi").transform;
+            respawn.SetParent(flames, false);
+            respawn.position = FlameRespawn;
+
+            CreateFlameBar(flames, "Alev_On", center + new Vector3(0f, 0.25f, -2.5f), new Vector3(6f, 0.5f, 1f), respawn, material);
+            CreateFlameBar(flames, "Alev_Arka", center + new Vector3(0f, 0.25f, 2.5f), new Vector3(6f, 0.5f, 1f), respawn, material);
+            CreateFlameBar(flames, "Alev_Sol", center + new Vector3(-2.5f, 0.25f, 0f), new Vector3(1f, 0.5f, 4f), respawn, material);
+            CreateFlameBar(flames, "Alev_Sag", center + new Vector3(2.5f, 0.25f, 0f), new Vector3(1f, 0.5f, 4f), respawn, material);
+        }
+
+        private static void CreateFlameBar(Transform parent, string name, Vector3 position, Vector3 size, Transform respawn, Material material)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.name = name;
+            go.transform.SetParent(parent, false);
+            go.transform.position = position;
+            go.transform.localScale = size;
+            go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+
+            if (material != null)
+                go.GetComponent<Renderer>().sharedMaterial = material;
+
+            go.GetComponent<BoxCollider>().isTrigger = true;
+            var zone = go.AddComponent<ChasmKillZone>();
+            zone.RespawnPoint = respawn;
         }
 
         private static Firefly CreateFirefly(Transform root, PlayerInventory inventory, Material material)
