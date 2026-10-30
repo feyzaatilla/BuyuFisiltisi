@@ -1,7 +1,7 @@
 {
     "name": "BuyuFisiltisi.Testing",
     "rootNamespace": "BuyuFisiltisi.Testing",
-    "references": ["BuyuFisiltisi.Core", "BuyuFisiltisi.Companion"],
+    "references": ["BuyuFisiltisi.Core", "BuyuFisiltisi.Companion", "Unity.InputSystem"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
