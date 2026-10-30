@@ -9,6 +9,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 {
     public sealed class QuestTracker : MonoBehaviour, IRequiresEventBus
     {
+        private const string CloudsStep = "bulutlar";
         private const string BridgeStep = "kopru";
         private const string FlowersStep = "cicekler";
         private const string TeaStep = "cay";
@@ -20,6 +21,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private readonly QuestLog _log = new QuestLog(new[]
         {
+            new QuestStep(CloudsStep, "Kara bulutları dağıt (R)"),
             new QuestStep(BridgeStep, "Şalteri çek (B) ve köprüyü indir"),
             new QuestStep(FlowersStep, "Beş ışık çiçeğini topla (iki kolay, alevli, dağdaki, yalancı)"),
             new QuestStep(TeaStep, "Işık Çayı demle (T)"),
@@ -30,6 +32,8 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private IEventBus _eventBus;
         private int _flowers;
+        private int _clouds;
+        private int _cloudsTotal;
         private string _toast = string.Empty;
         private float _toastUntil;
         private GUIStyle _taskStyle;
@@ -60,6 +64,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_eventBus == null)
                 return;
 
+            _eventBus.Subscribe<CloudDispersedEvent>(OnCloudDispersed);
             _eventBus.Subscribe<SwitchPulledEvent>(OnSwitchPulled);
             _eventBus.Subscribe<ItemCollectedEvent>(OnItemCollected);
             _eventBus.Subscribe<RecipeCompletedEvent>(OnRecipeCompleted);
@@ -73,12 +78,21 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_eventBus == null)
                 return;
 
+            _eventBus.Unsubscribe<CloudDispersedEvent>(OnCloudDispersed);
             _eventBus.Unsubscribe<SwitchPulledEvent>(OnSwitchPulled);
             _eventBus.Unsubscribe<ItemCollectedEvent>(OnItemCollected);
             _eventBus.Unsubscribe<RecipeCompletedEvent>(OnRecipeCompleted);
             _eventBus.Unsubscribe<DeedRecordedEvent>(OnDeedRecorded);
             _eventBus.Unsubscribe<TrustChangedEvent>(OnTrustChanged);
             _eventBus.Unsubscribe<DoorOpenRequestedEvent>(OnDoorOpenRequested);
+        }
+
+        private void OnCloudDispersed(CloudDispersedEvent dispersed)
+        {
+            _clouds = dispersed.Dispersed;
+            _cloudsTotal = dispersed.Total;
+            if (_clouds >= _cloudsTotal)
+                Complete(CloudsStep);
         }
 
         private void OnSwitchPulled(SwitchPulledEvent pulled)
@@ -137,6 +151,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
             var current = _log.Current;
             if (!current.HasValue)
                 return "Tüm görevler tamamlandı";
+
+            if (current.Value.Id == CloudsStep && _cloudsTotal > 0)
+                return current.Value.Text + ": " + _clouds + "/" + _cloudsTotal;
 
             if (current.Value.Id == FlowersStep)
                 return current.Value.Text + ": " + Mathf.Min(_flowers, FlowersNeeded) + "/" + FlowersNeeded;
