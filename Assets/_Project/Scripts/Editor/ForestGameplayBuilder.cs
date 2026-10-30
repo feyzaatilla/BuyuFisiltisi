@@ -15,6 +15,7 @@ namespace BuyuFisiltisi.EditorTools
         private const string CloudMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Sinir.mat";
         private const string CaveMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Magara.mat";
         private const string ModelFolder = "Assets/_Project/Art/kenney_nature-kit/Models/FBX format/";
+        private const string GlowMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Isilti.mat";
         private const string Title = "Orman Oynanışı";
         private const string WitchPath = "_Characters/Cadi";
         private const string RootName = "_Oynanis";
@@ -103,6 +104,7 @@ namespace BuyuFisiltisi.EditorTools
             CreateClouds(root, body != null ? body : witch.transform);
             CreateCave(root);
             CreateForestDecor(root);
+            CreateDeepForest(root);
             new GameObject("SisKontrol").transform.SetParent(root, false);
             root.Find("SisKontrol").gameObject.AddComponent<CloudFog>();
             new GameObject("KaranlikKontrol").transform.SetParent(root, false);
@@ -299,6 +301,146 @@ namespace BuyuFisiltisi.EditorTools
             }
         }
 
+        private static void CreateDeepForest(Transform root)
+        {
+            var forest = new GameObject("DerinOrman").transform;
+            forest.SetParent(root, false);
+
+            foreach (var name in new[] { "Sinir_Sol", "Sinir_Sag", "Sinir_Bas", "Sinir_Son", "AtesBocegiAgaci_Govde", "YasliMese_Govde", "KapiDuvari_Sol", "KapiDuvari_Sag" })
+                HideRenderer(name);
+            foreach (var wall in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
+            {
+                if (wall.name.StartsWith("KokDuvari_") && wall.GetComponent<Renderer>() != null)
+                    wall.GetComponent<Renderer>().enabled = false;
+            }
+
+            CreateHedges(forest);
+            CreateFireflySwarm(forest);
+
+            var groundSource = GameObject.Find("Zemin");
+            var outer = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            outer.name = "DisZemin";
+            outer.transform.SetParent(forest, false);
+            outer.transform.position = new Vector3(0f, -0.02f, 44f);
+            outer.transform.localScale = new Vector3(8f, 1f, 14f);
+            Object.DestroyImmediate(outer.GetComponent<Collider>());
+            if (groundSource != null && groundSource.GetComponent<Renderer>() != null)
+                outer.GetComponent<Renderer>().sharedMaterial = groundSource.GetComponent<Renderer>().sharedMaterial;
+
+            var random = new System.Random(21);
+            var trees = new[] { "tree_pineTallA", "tree_pineTallB", "tree_pineTallC", "tree_pineTallD", "tree_default_dark", "tree_detailed_dark", "tree_oak_dark", "tree_fat_darkh", "tree_pineRoundC" };
+            var ground = new[] { "grass_large", "grass_leafsLarge", "plant_bushLarge", "plant_bushDetailed", "plant_flatTall", "mushroom_tanTall", "rock_smallA", "stump_round" };
+
+            for (var row = 0; row < 4; row++)
+            {
+                for (var z = -6f; z < 96f; z += 2.6f)
+                {
+                    foreach (var side in new[] { -1f, 1f })
+                    {
+                        var x = side * (10.8f + row * 2.4f + (float)random.NextDouble() * 1.4f);
+                        var zz = z + (float)random.NextDouble() * 2f;
+                        PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x, 0f, zz), random.Next(360), 5.5f + row * 1.2f + (float)random.NextDouble() * 3f);
+                    }
+                }
+            }
+
+            for (var row = 0; row < 3; row++)
+            {
+                for (var x = -16f; x <= 16f; x += 2.4f)
+                {
+                    PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x + (float)random.NextDouble(), 0f, -6f - row * 2.4f), random.Next(360), 6f + (float)random.NextDouble() * 3f);
+                    PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x + (float)random.NextDouble(), 0f, 92f + row * 2.4f), random.Next(360), 6f + (float)random.NextDouble() * 3f);
+                }
+            }
+
+            for (var i = 0; i < 140; i++)
+            {
+                var x = -9.5f + (float)random.NextDouble() * 19f;
+                var z = -3f + (float)random.NextDouble() * 90f;
+                if (Mathf.Abs(x) < 3.5f)
+                    continue;
+                if (x > 6.5f && z > 10f && z < 20f)
+                    continue;
+                if (z > 19f && z < 31f)
+                    continue;
+
+                PlaceModel(forest, ground[random.Next(ground.Length)], new Vector3(x, 0f, z), random.Next(360), 0.5f + (float)random.NextDouble() * 0.7f);
+            }
+
+            PlaceModel(forest, "tree_oak_dark", new Vector3(5f, 0f, 62f), 30f, 9f);
+            PlaceModel(forest, "tree_fat_darkh", new Vector3(-4f, 0f, 82f), 0f, 10f);
+        }
+
+        private static Material GetGlowMaterial()
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(GlowMaterialPath);
+            if (material != null)
+                return material;
+
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            material.color = new Color(1f, 0.9f, 0.35f);
+            AssetDatabase.CreateAsset(material, GlowMaterialPath);
+            return material;
+        }
+
+        private static void CreateFireflySwarm(Transform root)
+        {
+            var swarm = new GameObject("AtesBocekleri").transform;
+            swarm.SetParent(root, false);
+
+            var random = new System.Random(5);
+            var material = GetGlowMaterial();
+            for (var i = 0; i < 40; i++)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = "Bocek_" + (i + 1);
+                go.transform.SetParent(swarm, false);
+                var x = -9f + (float)random.NextDouble() * 18f;
+                var z = -2f + (float)random.NextDouble() * 88f;
+                go.transform.position = new Vector3(x, 0.6f + (float)random.NextDouble() * 2.2f, z);
+                go.transform.localScale = Vector3.one * 0.07f;
+                Object.DestroyImmediate(go.GetComponent<Collider>());
+                go.GetComponent<Renderer>().sharedMaterial = material;
+                go.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                go.AddComponent<DriftMotion>();
+            }
+        }
+
+        private static void CreateHedges(Transform root)
+        {
+            var hedge = new GameObject("Calilar").transform;
+            hedge.SetParent(root, false);
+
+            var random = new System.Random(11);
+            var bushes = new[] { "plant_bushLarge", "plant_bushDetailed", "plant_bush", "rock_largeA", "rock_largeC" };
+            for (var z = 41f; z <= 47f; z += 0.9f)
+            {
+                if (Mathf.Abs(z - 44f) < 0.6f)
+                    continue;
+                PlaceModel(hedge, bushes[random.Next(bushes.Length)], new Vector3(-7f, 0f, z), random.Next(360), 2.2f);
+            }
+
+            for (var x = -10f; x <= -7f; x += 0.9f)
+            {
+                PlaceModel(hedge, bushes[random.Next(bushes.Length)], new Vector3(x, 0f, 41f), random.Next(360), 2.2f);
+                PlaceModel(hedge, bushes[random.Next(bushes.Length)], new Vector3(x, 0f, 47f), random.Next(360), 2.2f);
+            }
+
+            for (var x = -10f; x <= 10f; x += 1.1f)
+            {
+                if (Mathf.Abs(x) < 2.8f)
+                    continue;
+                PlaceModel(hedge, "cliff_block_rock", new Vector3(x, 0f, 89.6f), random.Next(4) * 90f, 2.6f);
+            }
+        }
+
+        private static void HideRenderer(string name)
+        {
+            var target = GameObject.Find(name);
+            if (target != null && target.GetComponent<Renderer>() != null)
+                target.GetComponent<Renderer>().enabled = false;
+        }
+
         private static void PlaceModel(Transform parent, string modelName, Vector3 position, float yaw, float targetSize)
         {
             var asset = AssetDatabase.LoadAssetAtPath<GameObject>(ModelFolder + modelName + ".fbx");
@@ -435,8 +577,23 @@ namespace BuyuFisiltisi.EditorTools
             Object.DestroyImmediate(go.GetComponent<SphereCollider>());
             go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
 
-            if (material != null)
-                go.GetComponent<Renderer>().sharedMaterial = material;
+            go.transform.localScale = Vector3.one * 0.18f;
+            go.GetComponent<Renderer>().sharedMaterial = GetGlowMaterial();
+
+            var glow = new GameObject("Isilti");
+            glow.transform.SetParent(go.transform, false);
+            var light = glow.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.85f, 0.3f);
+            light.intensity = 4f;
+            light.range = 3f;
+            var flicker = new SerializedObject(glow.AddComponent<FlickerLight>());
+            flicker.FindProperty("_amount").floatValue = 0.6f;
+            flicker.ApplyModifiedPropertiesWithoutUndo();
+
+            var drift = new SerializedObject(go.AddComponent<DriftMotion>());
+            drift.FindProperty("_amplitude").floatValue = 0.12f;
+            drift.ApplyModifiedPropertiesWithoutUndo();
 
             var point = new GameObject("DurmaNoktasi").transform;
             point.SetParent(go.transform, false);
