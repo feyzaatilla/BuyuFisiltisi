@@ -13,6 +13,9 @@ namespace BuyuFisiltisi.Gameplay.Items
 
         private void OnGUI()
         {
+            if (Time.timeScale == 0f)
+                return;
+
             if (_inventory == null)
                 _inventory = GetComponent<PlayerInventory>();
 
