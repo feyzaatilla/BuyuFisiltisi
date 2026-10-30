@@ -14,6 +14,7 @@ namespace BuyuFisiltisi.UI.Oak
     {
         private const string TalkPrompt = "E  ·  Yaşlı Meşe ile konuş";
         private const string ListeningText = "Yaşlı Meşe seni dinliyor. Yaz ve Enter'a bas. Çıkmak için Esc.";
+        private const string WakingText = "Yaşlı Meşe uyanıyor, ilk cevap biraz gecikebilir. Yine de yazabilirsin.";
         private const string InputPrefix = "Sen: ";
         private const int VisibleCharacters = 70;
         private const float BackspaceDelay = 0.4f;
@@ -35,6 +36,7 @@ namespace BuyuFisiltisi.UI.Oak
         private Keyboard _keyboard;
         private bool _open;
         private bool _thinking;
+        private bool _warming;
         private float _backspaceHeld;
 
         public void InjectEventBus(IEventBus eventBus)
@@ -48,6 +50,18 @@ namespace BuyuFisiltisi.UI.Oak
         private void Start()
         {
             RefreshTrust();
+            WarmUp();
+        }
+
+        private async void WarmUp()
+        {
+            _warming = true;
+            var warm = await OllamaWarmup.RunAsync(new UnityWebRequestTransport(), _settings);
+            if (this == null)
+                return;
+
+            _warming = false;
+            Debug.Log($"[Meşe] Model ısıtma: {(warm ? "tamam" : "başarısız")}", this);
         }
 
         private void OnDestroy()
@@ -150,7 +164,7 @@ namespace BuyuFisiltisi.UI.Oak
             _view.SetPrompt(string.Empty);
             _view.SetOpen(true);
             _view.ShowPlayer(string.Empty);
-            _view.ShowReply(ListeningText);
+            _view.ShowReply(_warming ? WakingText : ListeningText);
             RefreshTrust();
             ShowInput();
             _bus?.Publish(new DialogueFocusChangedEvent(true));
