@@ -152,10 +152,10 @@ namespace BuyuFisiltisi.EditorTools
             respawn.SetParent(flames, false);
             respawn.position = FlameRespawn;
 
-            CreateFlameBar(flames, "Alev_On", center + new Vector3(0f, 0.25f, -2.5f), new Vector3(6f, 0.5f, 1f), respawn, material);
-            CreateFlameBar(flames, "Alev_Arka", center + new Vector3(0f, 0.25f, 2.5f), new Vector3(6f, 0.5f, 1f), respawn, material);
-            CreateFlameBar(flames, "Alev_Sol", center + new Vector3(-2.5f, 0.25f, 0f), new Vector3(1f, 0.5f, 4f), respawn, material);
-            CreateFlameBar(flames, "Alev_Sag", center + new Vector3(2.5f, 0.25f, 0f), new Vector3(1f, 0.5f, 4f), respawn, material);
+            CreateFlameBar(flames, "Alev_On", center + new Vector3(0f, 0.125f, -2.5f), new Vector3(6f, 0.25f, 0.8f), respawn, material);
+            CreateFlameBar(flames, "Alev_Arka", center + new Vector3(0f, 0.125f, 2.5f), new Vector3(6f, 0.25f, 0.8f), respawn, material);
+            CreateFlameBar(flames, "Alev_Sol", center + new Vector3(-2.5f, 0.125f, 0f), new Vector3(0.8f, 0.25f, 4f), respawn, material);
+            CreateFlameBar(flames, "Alev_Sag", center + new Vector3(2.5f, 0.125f, 0f), new Vector3(0.8f, 0.25f, 4f), respawn, material);
         }
 
         private static void CreateFlameBar(Transform parent, string name, Vector3 position, Vector3 size, Transform respawn, Material material)
