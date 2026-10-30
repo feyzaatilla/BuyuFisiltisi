@@ -1,3 +1,4 @@
+using BuyuFisiltisi.Core.Items;
 using BuyuFisiltisi.Gameplay.Forest;
 using BuyuFisiltisi.Gameplay.Items;
 using BuyuFisiltisi.Gameplay.World;
@@ -16,6 +17,7 @@ namespace BuyuFisiltisi.EditorTools
         private const string CaveMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Magara.mat";
         private const string ModelFolder = "Assets/_Project/Art/kenney_nature-kit/Models/FBX format/";
         private const string GlowMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Isilti.mat";
+        private const string LavaMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Lav.mat";
         private const string Title = "Orman Oynanışı";
         private const string WitchPath = "_Characters/Cadi";
         private const string RootName = "_Oynanis";
@@ -24,10 +26,24 @@ namespace BuyuFisiltisi.EditorTools
         {
             new Vector3(-4f, 0.4f, 38f),
             new Vector3(3f, 0.4f, 42f),
-            new Vector3(0f, 0.4f, 52f),
+            new Vector3(0f, 0.9f, 52f),
             new Vector3(-5f, 4.1f, 64.9f),
-            new Vector3(5f, 0.4f, 44f)
+            new Vector3(5f, 0.4f, 44f),
+            new Vector3(-9f, 0.4f, 44f)
         };
+
+        private static readonly string[] FlowerItems =
+        {
+            ItemCatalog.SilverHyacinth, ItemCatalog.RootPomegranate, ItemCatalog.SilverHyacinth,
+            ItemCatalog.NightViolet, ItemCatalog.RedWhistleWeed, ItemCatalog.MistFlower
+        };
+
+        private static readonly string[] FlowerModels =
+        {
+            "flower_purpleB", "flower_redC", "flower_purpleB", "flower_purpleC", "flower_redA", "flower_yellowC"
+        };
+
+        private static readonly Vector3 RootPosition = new Vector3(-1.2f, 0f, 80f);
 
         private static readonly Vector3[] DecoySpots =
         {
@@ -38,6 +54,7 @@ namespace BuyuFisiltisi.EditorTools
 
         private const int MountainFlowerIndex = 3;
         private const int DecoyFlowerIndex = 4;
+        private const int NookFlowerIndex = 5;
 
         private const int HiddenFlowerIndex = 2;
         private static readonly Vector3 FlameRespawn = new Vector3(0f, 0.1f, 46f);
@@ -88,9 +105,9 @@ namespace BuyuFisiltisi.EditorTools
             var body = witch.transform.Find("Cadi_Govde");
             CreateDecoy(root, flowers[DecoyFlowerIndex], body != null ? body : witch.transform);
 
-            var reachable = new CollectibleFlower[HiddenFlowerIndex];
-            for (var i = 0; i < reachable.Length; i++)
-                reachable[i] = flowers[i];
+            flowers[0].gameObject.AddComponent<FlowerPickupOnTouch>();
+            flowers[1].gameObject.AddComponent<FlowerPickupOnTouch>();
+            var reachable = new[] { flowers[NookFlowerIndex] };
 
             var fetch = new GameObject("CicekEmri").AddComponent<FlowerFetchKeyboardInput>();
             fetch.transform.SetParent(root, false);
@@ -105,6 +122,7 @@ namespace BuyuFisiltisi.EditorTools
             CreateCave(root);
             CreateForestDecor(root);
             CreateDeepForest(root);
+            TuneCamera();
             new GameObject("SisKontrol").transform.SetParent(root, false);
             root.Find("SisKontrol").gameObject.AddComponent<CloudFog>();
             new GameObject("KaranlikKontrol").transform.SetParent(root, false);
@@ -115,6 +133,8 @@ namespace BuyuFisiltisi.EditorTools
 
             var firefly = CreateFirefly(root, inventory, material);
             CreateForestLight(root);
+
+            CreateWoundedRoot(root, inventory);
 
             var fireflyInput = new GameObject("AtesBocegiEmri").AddComponent<FireflyKeyboardInput>();
             fireflyInput.transform.SetParent(root, false);
@@ -169,7 +189,9 @@ namespace BuyuFisiltisi.EditorTools
 
             var flower = go.AddComponent<CollectibleFlower>();
             var data = new SerializedObject(flower);
-            data.FindProperty("_interactionId").stringValue = "isik_cicegi_" + (index + 1);
+            data.FindProperty("_interactionId").stringValue = "cicek_" + (index + 1);
+            data.FindProperty("_itemId").stringValue = FlowerItems[index];
+            data.FindProperty("_displayName").stringValue = ItemCatalog.GetName(FlowerItems[index]);
             data.FindProperty("_inventory").objectReferenceValue = inventory;
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();
@@ -181,8 +203,7 @@ namespace BuyuFisiltisi.EditorTools
             Object.DestroyImmediate(flower.GetComponent<MeshRenderer>());
             Object.DestroyImmediate(flower.GetComponent<MeshFilter>());
 
-            var models = new[] { "flower_yellowA", "flower_purpleA", "flower_yellowB", "flower_redA", "flower_purpleC" };
-            PlaceModel(flower, models[index % models.Length], new Vector3(position.x, position.y - 0.4f, position.z), index * 47f, 0.9f);
+            PlaceModel(flower, FlowerModels[index], new Vector3(position.x, position.y - 0.4f, position.z), index * 47f, 0.9f);
 
             var glow = new GameObject("Isilti");
             glow.transform.SetParent(flower, false);
@@ -306,7 +327,7 @@ namespace BuyuFisiltisi.EditorTools
             var forest = new GameObject("DerinOrman").transform;
             forest.SetParent(root, false);
 
-            foreach (var name in new[] { "Sinir_Sol", "Sinir_Sag", "Sinir_Bas", "Sinir_Son", "AtesBocegiAgaci_Govde", "YasliMese_Govde", "KapiDuvari_Sol", "KapiDuvari_Sag" })
+            foreach (var name in new[] { "Sinir_Sol", "Sinir_Sag", "Sinir_Bas", "Sinir_Son", "AtesBocegiAgaci_Govde", "YasliMese_Govde", "KapiDuvari_Sol", "KapiDuvari_Sag", "Cicek_GumusSumbul", "Cicek_GeceMenekse", "Cicek_KizilDudukOtu", "Cicek_SisCicegi_Girintide" })
                 HideRenderer(name);
             foreach (var wall in Object.FindObjectsByType<Transform>(FindObjectsSortMode.None))
             {
@@ -434,6 +455,44 @@ namespace BuyuFisiltisi.EditorTools
             }
         }
 
+        private static void TuneCamera()
+        {
+            var camera = Object.FindFirstObjectByType<BuyuFisiltisi.Gameplay.Player.ThirdPersonCamera>();
+            if (camera == null)
+                return;
+
+            var data = new SerializedObject(camera);
+            data.FindProperty("_targetHeight").floatValue = 1.6f;
+            data.FindProperty("_startPitch").floatValue = 14f;
+            data.FindProperty("_startDistance").floatValue = 4.5f;
+            data.FindProperty("_maxDistance").floatValue = 9f;
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateWoundedRoot(Transform root, PlayerInventory inventory)
+        {
+            var go = new GameObject("YaraliKok");
+            go.transform.SetParent(root, false);
+            go.transform.position = RootPosition;
+            PlaceModel(go.transform, "log_large", RootPosition, 70f, 2.4f);
+
+            var glow = new GameObject("YaraIsigi");
+            glow.transform.SetParent(go.transform, false);
+            glow.transform.position = RootPosition + Vector3.up * 0.8f;
+            var light = glow.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(0.9f, 0.15f, 0.2f);
+            light.intensity = 5f;
+            light.range = 3.5f;
+            glow.AddComponent<FlickerLight>();
+
+            var wound = go.AddComponent<WoundedRoot>();
+            var data = new SerializedObject(wound);
+            data.FindProperty("_inventory").objectReferenceValue = inventory;
+            data.FindProperty("_woundLight").objectReferenceValue = light;
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         private static void HideRenderer(string name)
         {
             var target = GameObject.Find(name);
@@ -537,20 +596,53 @@ namespace BuyuFisiltisi.EditorTools
 
         private static void CreateFlames(Transform root, Vector3 center, Material material)
         {
-            var flames = new GameObject("AlevHalkasi").transform;
-            flames.SetParent(root, false);
+            var pool = new GameObject("AtesHavuzu").transform;
+            pool.SetParent(root, false);
 
             var respawn = new GameObject("AlevDonusNoktasi").transform;
-            respawn.SetParent(flames, false);
+            respawn.SetParent(pool, false);
             respawn.position = FlameRespawn;
 
-            CreateFlameBar(flames, "Alev_On", center + new Vector3(0f, 0.125f, -2.5f), new Vector3(6f, 0.25f, 0.8f), respawn, material);
-            CreateFlameBar(flames, "Alev_Arka", center + new Vector3(0f, 0.125f, 2.5f), new Vector3(6f, 0.25f, 0.8f), respawn, material);
-            CreateFlameBar(flames, "Alev_Sol", center + new Vector3(-2.5f, 0.125f, 0f), new Vector3(0.8f, 0.25f, 4f), respawn, material);
-            CreateFlameBar(flames, "Alev_Sag", center + new Vector3(2.5f, 0.125f, 0f), new Vector3(0.8f, 0.25f, 4f), respawn, material);
+            var lava = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            lava.name = "Lav";
+            lava.transform.SetParent(pool, false);
+            lava.transform.position = new Vector3(center.x, 0f, center.z - 0.6f);
+            lava.transform.localScale = new Vector3(6f, 0.3f, 5f);
+            lava.GetComponent<Renderer>().sharedMaterial = GetLavaMaterial();
+            lava.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            lava.GetComponent<BoxCollider>().isTrigger = true;
+            lava.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            lava.AddComponent<ChasmKillZone>().RespawnPoint = respawn;
+
+            var stone = GetCaveMaterial();
+            CreateStone(pool, "Tas_1", new Vector3(center.x - 1.1f, 0.25f, center.z - 2.2f), new Vector3(1f, 0.5f, 1f), stone);
+            CreateStone(pool, "Tas_2", new Vector3(center.x + 0.9f, 0.25f, center.z - 1.1f), new Vector3(0.9f, 0.5f, 0.9f), stone);
+            CreateStone(pool, "Ada", new Vector3(center.x, 0.25f, center.z), new Vector3(1.4f, 0.5f, 1.4f), stone);
+
+            var glow = new GameObject("LavIsigi");
+            glow.transform.SetParent(pool, false);
+            glow.transform.position = new Vector3(center.x, 1.2f, center.z - 0.6f);
+            var light = glow.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.4f, 0.1f);
+            light.intensity = 10f;
+            light.range = 7f;
+            var flicker = new SerializedObject(glow.AddComponent<FlickerLight>());
+            flicker.FindProperty("_amount").floatValue = 0.4f;
+            flicker.ApplyModifiedPropertiesWithoutUndo();
+
+            var random = new System.Random(3);
+            for (var i = 0; i < 14; i++)
+            {
+                var angle = i / 14f * Mathf.PI * 2f;
+                var edge = new Vector3(center.x + Mathf.Cos(angle) * 3.4f, 0f, center.z - 0.6f + Mathf.Sin(angle) * 2.9f);
+                if (Mathf.Sin(angle) < -0.7f && Mathf.Abs(Mathf.Cos(angle)) < 0.5f)
+                    continue;
+                PlaceModel(pool, random.Next(2) == 0 ? "rock_smallA" : "rock_smallC", edge, random.Next(360), 0.7f);
+            }
         }
 
-        private static void CreateFlameBar(Transform parent, string name, Vector3 position, Vector3 size, Transform respawn, Material material)
+        private static void CreateStone(Transform parent, string name, Vector3 position, Vector3 size, Material material)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = name;
@@ -558,13 +650,20 @@ namespace BuyuFisiltisi.EditorTools
             go.transform.position = position;
             go.transform.localScale = size;
             go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
-
             if (material != null)
                 go.GetComponent<Renderer>().sharedMaterial = material;
+        }
 
-            go.GetComponent<BoxCollider>().isTrigger = true;
-            var zone = go.AddComponent<ChasmKillZone>();
-            zone.RespawnPoint = respawn;
+        private static Material GetLavaMaterial()
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(LavaMaterialPath);
+            if (material != null)
+                return material;
+
+            material = new Material(Shader.Find("Universal Render Pipeline/Unlit"));
+            material.color = new Color(1f, 0.35f, 0.05f);
+            AssetDatabase.CreateAsset(material, LavaMaterialPath);
+            return material;
         }
 
         private static Firefly CreateFirefly(Transform root, PlayerInventory inventory, Material material)
