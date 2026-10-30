@@ -15,7 +15,7 @@ namespace BuyuFisiltisi.Tests.EditMode.Items
         public void TryBrew_WithEnoughFlowers_SpendsFlowersAndAddsTea()
         {
             var inventory = new Inventory();
-            inventory.Add(Flower, 4);
+            inventory.Add(Flower, 6);
             var brewer = new Brewer(inventory, new EventBus());
 
             var result = brewer.TryBrew(Recipe.LightTea);
@@ -29,13 +29,13 @@ namespace BuyuFisiltisi.Tests.EditMode.Items
         public void TryBrew_WithoutEnoughFlowers_ChangesNothing()
         {
             var inventory = new Inventory();
-            inventory.Add(Flower, 2);
+            inventory.Add(Flower, 4);
             var brewer = new Brewer(inventory, new EventBus());
 
             var result = brewer.TryBrew(Recipe.LightTea);
 
             Assert.IsFalse(result);
-            Assert.AreEqual(2, inventory.Count(Flower));
+            Assert.AreEqual(4, inventory.Count(Flower));
             Assert.AreEqual(0, inventory.Count(Tea));
         }
 
@@ -49,7 +49,7 @@ namespace BuyuFisiltisi.Tests.EditMode.Items
             var brewer = new Brewer(inventory, bus);
 
             brewer.TryBrew(Recipe.LightTea);
-            inventory.Add(Flower, 3);
+            inventory.Add(Flower, 5);
             brewer.TryBrew(Recipe.LightTea);
 
             Assert.AreEqual(1, completed.Count);

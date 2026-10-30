@@ -6,7 +6,7 @@ namespace BuyuFisiltisi.Core.Items
     {
         public const string LightTeaId = "isik_cayi";
 
-        public static readonly Recipe LightTea = new Recipe(LightTeaId, "isik_cicegi", 3, LightTeaId);
+        public static readonly Recipe LightTea = new Recipe(LightTeaId, "isik_cicegi", 5, LightTeaId);
 
         public Recipe(string id, string ingredientId, int ingredientAmount, string productId)
         {
