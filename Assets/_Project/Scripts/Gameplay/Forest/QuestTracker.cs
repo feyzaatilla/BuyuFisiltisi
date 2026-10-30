@@ -22,11 +22,11 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private readonly QuestLog _log = new QuestLog(new[]
         {
-            new QuestStep(CloudsStep, "Kara bulutları dağıt (R)"),
-            new QuestStep(BridgeStep, "Şalteri çek (B) ve köprüyü indir"),
-            new QuestStep(FlowersStep, "Altı çiçeği topla (biri girintide, V ile Fısıl getirir)"),
-            new QuestStep(TeaStep, "Üç tarifi kazanda demle (T)"),
-            new QuestStep(FireflyStep, "Yaralı ateş böceğini çayla iyileştir (H)"),
+            new QuestStep(CloudsStep, "Kara bulutlara yaklaş, sol tıkla dağıt"),
+            new QuestStep(BridgeStep, "Kitaptan (Tab) Fısıl'a şalteri çektir, köprüyü indir"),
+            new QuestStep(FlowersStep, "Altı çiçeği topla (girintidekini kitaptan Fısıl'a getirt)"),
+            new QuestStep(TeaStep, "Büyü kazanına tıkla, üç tarifi demle"),
+            new QuestStep(FireflyStep, "Kitaptan Fısıl'la ateş böceğine çay götür"),
             new QuestStep(RootStep, "Meşe'nin yaralı köküne merhem sür"),
             new QuestStep(TalkStep, "Yaşlı Meşe'ye git, E ile konuş"),
             new QuestStep(DoorStep, "Meşe'nin güvenini kazan, kapıyı açtır")
@@ -173,6 +173,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private void OnGUI()
         {
+            if (Time.timeScale == 0f)
+                return;
+
             if (_taskStyle == null)
             {
                 _taskStyle = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold, alignment = TextAnchor.UpperCenter, wordWrap = true };

@@ -24,7 +24,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
         private void Update()
         {
             var keyboard = Keyboard.current;
-            if (keyboard == null || _player == null || !keyboard.rKey.wasPressedThisFrame)
+            var mouse = Mouse.current;
+            var cast = (keyboard != null && keyboard.rKey.wasPressedThisFrame) || (mouse != null && mouse.leftButton.wasPressedThisFrame);
+            if (_player == null || !cast)
                 return;
 
             var cloud = FindNearest();
