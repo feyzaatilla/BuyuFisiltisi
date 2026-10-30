@@ -8,7 +8,7 @@ namespace BuyuFisiltisi.LLM.Ollama
     {
         [SerializeField] private string baseUrl = "http://localhost:11434";
         [SerializeField] private string model = "gemma2:2b";
-        [SerializeField, Min(1f)] private float timeoutSeconds = 10f;
+        [SerializeField, Min(1f)] private float timeoutSeconds = 90f;
         [SerializeField, Range(0f, 1.5f)] private float temperature = 0.7f;
 
         public OllamaSettings()
