@@ -14,24 +14,27 @@ namespace BuyuFisiltisi.Gameplay.Forest
         private const string FlowersStep = "cicekler";
         private const string TeaStep = "cay";
         private const string FireflyStep = "ates_bocegi";
+        private const string RootStep = "kok";
         private const string TalkStep = "mese";
         private const string DoorStep = "kapi";
-        private const int FlowersNeeded = 5;
+        private const int FlowersNeeded = 6;
         private const float ToastSeconds = 4f;
 
         private readonly QuestLog _log = new QuestLog(new[]
         {
             new QuestStep(CloudsStep, "Kara bulutları dağıt (R)"),
             new QuestStep(BridgeStep, "Şalteri çek (B) ve köprüyü indir"),
-            new QuestStep(FlowersStep, "Beş ışık çiçeği topla"),
-            new QuestStep(TeaStep, "Işık Çayı demle (T)"),
+            new QuestStep(FlowersStep, "Altı çiçeği topla (biri girintide, V ile Fısıl getirir)"),
+            new QuestStep(TeaStep, "Üç tarifi kazanda demle (T)"),
             new QuestStep(FireflyStep, "Yaralı ateş böceğini çayla iyileştir (H)"),
+            new QuestStep(RootStep, "Meşe'nin yaralı köküne merhem sür"),
             new QuestStep(TalkStep, "Yaşlı Meşe'ye git, E ile konuş"),
             new QuestStep(DoorStep, "Meşe'nin güvenini kazan, kapıyı açtır")
         });
 
         private IEventBus _eventBus;
         private int _flowers;
+        private readonly System.Collections.Generic.HashSet<string> _recipes = new System.Collections.Generic.HashSet<string>();
         private int _clouds;
         private int _cloudsTotal;
         private string _toast = string.Empty;
@@ -102,7 +105,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private void OnItemCollected(ItemCollectedEvent collected)
         {
-            if (collected.ItemId != CollectibleFlower.LightFlowerId)
+            if (!ItemCatalog.IsFlower(collected.ItemId))
                 return;
 
             _flowers += collected.Amount;
@@ -112,7 +115,8 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private void OnRecipeCompleted(RecipeCompletedEvent completed)
         {
-            if (completed.RecipeId == Recipe.LightTeaId)
+            _recipes.Add(completed.RecipeId);
+            if (_recipes.Count >= Recipe.All.Count)
                 Complete(TeaStep);
         }
 
@@ -120,6 +124,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
         {
             if (deed.DeedId == Firefly.HealedDeedId)
                 Complete(FireflyStep);
+
+            if (deed.DeedId == WoundedRoot.HealedDeedId)
+                Complete(RootStep);
         }
 
         private void OnTrustChanged(TrustChangedEvent changed)
@@ -157,6 +164,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
             if (current.Value.Id == FlowersStep)
                 return current.Value.Text + ": " + Mathf.Min(_flowers, FlowersNeeded) + "/" + FlowersNeeded;
+
+            if (current.Value.Id == TeaStep)
+                return current.Value.Text + ": " + _recipes.Count + "/" + Recipe.All.Count;
 
             return current.Value.Text;
         }

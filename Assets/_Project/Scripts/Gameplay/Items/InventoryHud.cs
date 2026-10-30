@@ -1,3 +1,4 @@
+using System.Text;
 using BuyuFisiltisi.Core.Items;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ namespace BuyuFisiltisi.Gameplay.Items
     [RequireComponent(typeof(PlayerInventory))]
     public sealed class InventoryHud : MonoBehaviour
     {
+        private readonly StringBuilder _text = new StringBuilder();
         private PlayerInventory _inventory;
         private GUIStyle _style;
 
@@ -16,14 +18,31 @@ namespace BuyuFisiltisi.Gameplay.Items
 
             if (_style == null)
             {
-                _style = new GUIStyle(GUI.skin.label) { fontSize = 28, fontStyle = FontStyle.Bold };
+                _style = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerLeft };
                 _style.normal.textColor = new Color(1f, 0.95f, 0.6f);
             }
 
-            var flowers = _inventory.Inventory.Count(CollectibleFlower.LightFlowerId);
-            var tea = _inventory.Inventory.Count(Recipe.LightTeaId);
-            GUI.Label(new Rect(20f, Screen.height - 100f, 600f, 40f), "Işık çiçeği: " + flowers, _style);
-            GUI.Label(new Rect(20f, Screen.height - 60f, 600f, 40f), "Işık çayı: " + tea, _style);
+            _text.Length = 0;
+            foreach (var flower in ItemCatalog.Flowers)
+                Append(flower);
+            foreach (var recipe in Recipe.All)
+                Append(recipe.ProductId);
+
+            if (_text.Length == 0)
+                _text.Append("Çanta boş");
+
+            GUI.Label(new Rect(20f, Screen.height - 260f, 400f, 240f), _text.ToString(), _style);
+        }
+
+        private void Append(string itemId)
+        {
+            var count = _inventory.Inventory.Count(itemId);
+            if (count <= 0)
+                return;
+
+            if (_text.Length > 0)
+                _text.Append('\n');
+            _text.Append(ItemCatalog.GetName(itemId)).Append(": ").Append(count);
         }
     }
 }
