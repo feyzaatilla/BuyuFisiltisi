@@ -15,13 +15,13 @@ namespace BuyuFisiltisi.Gameplay.Forest
         private const string FireflyStep = "ates_bocegi";
         private const string TalkStep = "mese";
         private const string DoorStep = "kapi";
-        private const int FlowersNeeded = 3;
+        private const int FlowersNeeded = 5;
         private const float ToastSeconds = 4f;
 
         private readonly QuestLog _log = new QuestLog(new[]
         {
             new QuestStep(BridgeStep, "Şalteri çek (B) ve köprüyü indir"),
-            new QuestStep(FlowersStep, "Çiçek Vadisi'nde ışık çiçeklerini topla (V)"),
+            new QuestStep(FlowersStep, "Beş ışık çiçeğini topla (iki kolay, alevli, dağdaki, yalancı)"),
             new QuestStep(TeaStep, "Işık Çayı demle (T)"),
             new QuestStep(FireflyStep, "Yaralı ateş böceğini çayla iyileştir (H)"),
             new QuestStep(TalkStep, "Yaşlı Meşe'ye git, E ile konuş"),
