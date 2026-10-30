@@ -99,6 +99,8 @@ namespace BuyuFisiltisi.EditorTools
             fetchData.ApplyModifiedPropertiesWithoutUndo();
 
             CreateClouds(root, body != null ? body : witch.transform);
+            new GameObject("SisKontrol").transform.SetParent(root, false);
+            root.Find("SisKontrol").gameObject.AddComponent<CloudFog>();
 
             new GameObject("GorevRehberi").transform.SetParent(root, false);
             root.Find("GorevRehberi").gameObject.AddComponent<QuestTracker>();
