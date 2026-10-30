@@ -23,11 +23,22 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
-        public void Prompt_HasPoliteDoorRequestExample()
+        public void Prompt_WithEnoughTrust_HasOpenDoorExample()
         {
-            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(), null);
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), null);
 
             StringAssert.Contains("kapıyı benim için açar mısın?", prompt);
+            StringAssert.Contains("kapı açılıyor", prompt);
+        }
+
+        [Test]
+        public void Prompt_WithoutEnoughTrust_HasNoOpenDoorExample()
+        {
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 0), null);
+
+            StringAssert.Contains("kapıyı benim için açar mısın?", prompt);
+            StringAssert.DoesNotContain("kapı açılıyor", prompt);
+            StringAssert.Contains("Henüz sana yeterince güvenmiyorum", prompt);
         }
     }
 }
