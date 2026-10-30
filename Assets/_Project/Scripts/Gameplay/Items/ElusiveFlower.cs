@@ -22,11 +22,11 @@ namespace BuyuFisiltisi.Gameplay.Items
 
         private void Update()
         {
-            if (_player == null || _used >= _escapes || _spots.Length == 0)
-                return;
-
             if (_renderer != null && !_renderer.enabled && Time.time >= _visibleAt)
                 _renderer.enabled = true;
+
+            if (_player == null || _used >= _escapes || _spots.Length == 0)
+                return;
 
             var offset = transform.position - _player.position;
             offset.y = 0f;

@@ -81,7 +81,8 @@ namespace BuyuFisiltisi.EditorTools
             CreateMountain(root, material);
 
             flowers[DecoyFlowerIndex].gameObject.AddComponent<FlowerPickupOnTouch>();
-            CreateDecoy(root, flowers[DecoyFlowerIndex], inventory.transform);
+            var body = witch.transform.Find("Cadi_Govde");
+            CreateDecoy(root, flowers[DecoyFlowerIndex], body != null ? body : witch.transform);
 
             var reachable = new CollectibleFlower[HiddenFlowerIndex];
             for (var i = 0; i < reachable.Length; i++)
