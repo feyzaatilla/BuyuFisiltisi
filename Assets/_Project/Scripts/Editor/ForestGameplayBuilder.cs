@@ -13,6 +13,8 @@ namespace BuyuFisiltisi.EditorTools
         private const string ForestSceneName = "ForestScene";
         private const string MaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Etkilesim.mat";
         private const string CloudMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Sinir.mat";
+        private const string CaveMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Magara.mat";
+        private const string ModelFolder = "Assets/_Project/Art/kenney_nature-kit/Models/FBX format/";
         private const string Title = "Orman Oynanışı";
         private const string WitchPath = "_Characters/Cadi";
         private const string RootName = "_Oynanis";
@@ -99,8 +101,12 @@ namespace BuyuFisiltisi.EditorTools
             fetchData.ApplyModifiedPropertiesWithoutUndo();
 
             CreateClouds(root, body != null ? body : witch.transform);
+            CreateCave(root);
+            CreateForestDecor(root);
             new GameObject("SisKontrol").transform.SetParent(root, false);
             root.Find("SisKontrol").gameObject.AddComponent<CloudFog>();
+            new GameObject("KaranlikKontrol").transform.SetParent(root, false);
+            root.Find("KaranlikKontrol").gameObject.AddComponent<ForestDarkness>();
 
             new GameObject("GorevRehberi").transform.SetParent(root, false);
             root.Find("GorevRehberi").gameObject.AddComponent<QuestTracker>();
@@ -203,6 +209,125 @@ namespace BuyuFisiltisi.EditorTools
             cloudList.arraySize = list.Length;
             for (var i = 0; i < list.Length; i++)
                 cloudList.GetArrayElementAtIndex(i).objectReferenceValue = list[i];
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static Material GetCaveMaterial()
+        {
+            var material = AssetDatabase.LoadAssetAtPath<Material>(CaveMaterialPath);
+            if (material != null)
+                return material;
+
+            var source = AssetDatabase.LoadAssetAtPath<Material>(CloudMaterialPath);
+            material = source != null ? new Material(source) : new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            var color = new Color(0.12f, 0.12f, 0.15f);
+            material.color = color;
+            material.SetColor("_BaseColor", color);
+            AssetDatabase.CreateAsset(material, CaveMaterialPath);
+            return material;
+        }
+
+        private static void CreateCave(Transform root)
+        {
+            var cave = new GameObject("Magara").transform;
+            cave.SetParent(root, false);
+
+            PlaceModel(cave, "cliff_cave_rock", new Vector3(10.3f, 0f, 15f), -90f, 6.4f);
+            PlaceModel(cave, "cliff_large_rock", new Vector3(9f, 0f, 11.4f), 90f, 4.2f);
+            PlaceModel(cave, "cliff_large_rock", new Vector3(9f, 0f, 18.6f), 90f, 4.2f);
+            PlaceModel(cave, "rock_tallA", new Vector3(7.2f, 0f, 11.6f), 20f, 2.6f);
+            PlaceModel(cave, "rock_tallC", new Vector3(7.2f, 0f, 18.4f), 160f, 2.6f);
+            PlaceModel(cave, "rock_largeB", new Vector3(6.6f, 0f, 13.4f), 40f, 1.4f);
+            PlaceModel(cave, "rock_smallA", new Vector3(7.4f, 0f, 16.6f), 75f, 0.8f);
+            PlaceModel(cave, "stone_tallB", new Vector3(5.8f, 0f, 10.6f), 10f, 1.8f);
+            PlaceModel(cave, "stone_tallD", new Vector3(5.8f, 0f, 19.4f), 200f, 1.8f);
+
+            CreateCaveLight(cave, "MagaraIsigi", new Vector3(8.5f, 1.8f, 15f), new Color(0.35f, 0.5f, 1f), 12f, 7f, 0.25f);
+            CreateCaveLight(cave, "MesaleIsigi", new Vector3(9.4f, 1.6f, 13f), new Color(1f, 0.55f, 0.2f), 14f, 6f, 0.5f);
+        }
+
+        private static void CreateForestDecor(Transform root)
+        {
+            var decor = new GameObject("Suslemeler").transform;
+            decor.SetParent(root, false);
+
+            var random = new System.Random(7);
+            var trees = new[] { "tree_default_dark", "tree_detailed_dark", "tree_oak_dark", "tree_fat_darkh", "tree_pineTallA", "tree_pineTallC" };
+            var props = new[] { "stump_old", "stump_oldTall", "log", "log_large", "mushroom_redGroup", "mushroom_tanGroup" };
+
+            for (var z = 2f; z < 84f; z += 4.5f)
+            {
+                foreach (var side in new[] { -1f, 1f })
+                {
+                    var x = side * (8.6f + (float)random.NextDouble() * 1.2f);
+                    var zz = z + (float)random.NextDouble() * 2f;
+                    if (x > 5f && zz > 9f && zz < 21f)
+                        continue;
+
+                    PlaceModel(decor, trees[random.Next(trees.Length)], new Vector3(x, 0f, zz), random.Next(360), 4f + (float)random.NextDouble() * 2.5f);
+                }
+            }
+
+            for (var z = 6f; z < 80f; z += 7f)
+            {
+                var side = random.Next(2) == 0 ? -1f : 1f;
+                var x = side * (6.8f + (float)random.NextDouble() * 1.4f);
+                var zz = z + (float)random.NextDouble() * 3f;
+                if (x > 5f && zz > 9f && zz < 21f)
+                    continue;
+
+                PlaceModel(decor, props[random.Next(props.Length)], new Vector3(x, 0f, zz), random.Next(360), 1.1f);
+            }
+        }
+
+        private static void PlaceModel(Transform parent, string modelName, Vector3 position, float yaw, float targetSize)
+        {
+            var asset = AssetDatabase.LoadAssetAtPath<GameObject>(ModelFolder + modelName + ".fbx");
+            if (asset == null)
+            {
+                Debug.LogWarning("[Orman] Model bulunamadı: " + modelName);
+                return;
+            }
+
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(asset, parent);
+            instance.name = modelName;
+            instance.transform.position = position;
+            instance.transform.rotation = Quaternion.Euler(0f, yaw, 0f);
+
+            var renderers = instance.GetComponentsInChildren<Renderer>();
+            if (renderers.Length == 0)
+                return;
+
+            var bounds = renderers[0].bounds;
+            foreach (var renderer in renderers)
+                bounds.Encapsulate(renderer.bounds);
+
+            var largest = Mathf.Max(bounds.size.x, bounds.size.y, bounds.size.z);
+            if (largest > 0.0001f)
+                instance.transform.localScale = Vector3.one * (targetSize / largest);
+
+            bounds = renderers[0].bounds;
+            foreach (var renderer in renderers)
+                bounds.Encapsulate(renderer.bounds);
+
+            instance.transform.position += new Vector3(0f, position.y - bounds.min.y, 0f);
+        }
+
+        private static void CreateCaveLight(Transform parent, string name, Vector3 position, Color color, float intensity, float range, float flicker)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            go.transform.position = position;
+
+            var light = go.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = color;
+            light.intensity = intensity;
+            light.range = range;
+
+            var flickerLight = go.AddComponent<FlickerLight>();
+            var data = new SerializedObject(flickerLight);
+            data.FindProperty("_amount").floatValue = flicker;
             data.ApplyModifiedPropertiesWithoutUndo();
         }
 

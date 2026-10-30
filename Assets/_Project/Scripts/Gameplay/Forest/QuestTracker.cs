@@ -23,7 +23,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
         {
             new QuestStep(CloudsStep, "Kara bulutları dağıt (R)"),
             new QuestStep(BridgeStep, "Şalteri çek (B) ve köprüyü indir"),
-            new QuestStep(FlowersStep, "Beş ışık çiçeğini topla (iki kolay, alevli, dağdaki, yalancı)"),
+            new QuestStep(FlowersStep, "Beş ışık çiçeği topla"),
             new QuestStep(TeaStep, "Işık Çayı demle (T)"),
             new QuestStep(FireflyStep, "Yaralı ateş böceğini çayla iyileştir (H)"),
             new QuestStep(TalkStep, "Yaşlı Meşe'ye git, E ile konuş"),
@@ -165,17 +165,17 @@ namespace BuyuFisiltisi.Gameplay.Forest
         {
             if (_taskStyle == null)
             {
-                _taskStyle = new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Bold, alignment = TextAnchor.UpperCenter };
+                _taskStyle = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold, alignment = TextAnchor.UpperCenter, wordWrap = true };
                 _taskStyle.normal.textColor = Color.white;
                 _toastStyle = new GUIStyle(_taskStyle) { fontSize = 26 };
                 _toastStyle.normal.textColor = new Color(0.6f, 1f, 0.6f);
             }
 
             var width = Screen.width;
-            GUI.Label(new Rect(0f, Screen.height - 160f, width, 36f), "Görev: " + CurrentText(), _taskStyle);
+            GUI.Label(new Rect(0f, Screen.height - 190f, width, 70f), "Görev: " + CurrentText(), _taskStyle);
 
             if (Time.unscaledTime < _toastUntil || _log.IsFinished)
-                GUI.Label(new Rect(0f, Screen.height - 200f, width, 36f), _toast, _toastStyle);
+                GUI.Label(new Rect(0f, Screen.height - 240f, width, 50f), _toast, _toastStyle);
         }
     }
 }
