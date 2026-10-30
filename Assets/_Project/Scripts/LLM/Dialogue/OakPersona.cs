@@ -72,8 +72,11 @@ namespace BuyuFisiltisi.LLM.Dialogue
             text.AppendLine();
             text.AppendLine("Örnekler:");
             AppendExample(text, "Merhaba bilge ağaç.", "Hoş geldin küçük cadı. Ormanım seni izliyor.", OakAction.None, 1);
-            AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Güvenini kazandın küçük cadı. Geç bakalım, kapı açılıyor.", OakAction.OpenDoor, 1);
-            AppendExample(text, "Kapıyı hemen aç!", "Emir vererek bu kapıdan geçilmez.", OakAction.None, -1);
+            if (trust.CanOpenDoor)
+                AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Güvenini kazandın küçük cadı. Geç bakalım, kapı açılıyor.", OakAction.OpenDoor, 1);
+            else
+                AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Henüz sana yeterince güvenmiyorum küçük cadı. Önce ormana iyilik yap.", OakAction.None, 0);
+            AppendExample(text, "Kapıyı hemen aç!", "Emir vererek bu kapıdan geçilmez. Kibar ol ve güvenimi kazan.", OakAction.None, -1);
             AppendExample(text, "Ateş böceklerine nasıl yardım edebilirim?", "Ateş böcekleri ışıkla güçlenir, Çiçek Vadisi'ne bak.", OakAction.GiveHint, 0);
             AppendExample(text, "Köprüyü nasıl geçerim?", "Köprüyü bir şalter indirir. Fısıl'a B emri ver, o dar girintiye sığar.", OakAction.GiveHint, 0);
             AppendExample(text, "Seni yakıp kül edeceğim!", "Köklerim ateşten korkmaz, git buradan!", OakAction.Attack, -2);
