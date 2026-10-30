@@ -12,6 +12,7 @@ namespace BuyuFisiltisi.EditorTools
     {
         private const string ForestSceneName = "ForestScene";
         private const string MaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Etkilesim.mat";
+        private const string CloudMaterialPath = "Assets/_Project/Materials/Graybox/Graybox_Sinir.mat";
         private const string Title = "Orman Oynanışı";
         private const string WitchPath = "_Characters/Cadi";
         private const string RootName = "_Oynanis";
@@ -97,6 +98,8 @@ namespace BuyuFisiltisi.EditorTools
                 list.GetArrayElementAtIndex(i).objectReferenceValue = reachable[i];
             fetchData.ApplyModifiedPropertiesWithoutUndo();
 
+            CreateClouds(root, body != null ? body : witch.transform);
+
             new GameObject("GorevRehberi").transform.SetParent(root, false);
             root.Find("GorevRehberi").gameObject.AddComponent<QuestTracker>();
 
@@ -111,7 +114,7 @@ namespace BuyuFisiltisi.EditorTools
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
-            Debug.Log("[Orman] Çiçekler, ateş böceği ve orman ışığı ForestScene sahnesine eklendi. V, T ve H tuşlarını dene.");
+            Debug.Log("[Orman] Çiçekler, ateş böceği ve orman ışığı ForestScene sahnesine eklendi. R, V, T ve H tuşlarını dene.");
         }
 
         private static void Clear(GameObject witch)
@@ -160,6 +163,45 @@ namespace BuyuFisiltisi.EditorTools
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();
             return flower;
+        }
+
+        private static void CreateClouds(Transform root, Transform player)
+        {
+            var cloudMaterial = AssetDatabase.LoadAssetAtPath<Material>(CloudMaterialPath);
+            var clouds = new GameObject("KaraBulutlar").transform;
+            clouds.SetParent(root, false);
+
+            var positions = new[]
+            {
+                new Vector3(-3f, 3f, 0f),
+                new Vector3(4f, 3.2f, 6f),
+                new Vector3(-2f, 3.4f, 13f)
+            };
+
+            var list = new DarkCloud[positions.Length];
+            for (var i = 0; i < positions.Length; i++)
+            {
+                var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                go.name = "KaraBulut_" + (i + 1);
+                go.transform.SetParent(clouds, false);
+                go.transform.position = positions[i];
+                go.transform.localScale = new Vector3(3f, 1.2f, 2.5f);
+                Object.DestroyImmediate(go.GetComponent<SphereCollider>());
+
+                if (cloudMaterial != null)
+                    go.GetComponent<Renderer>().sharedMaterial = cloudMaterial;
+
+                list[i] = go.AddComponent<DarkCloud>();
+            }
+
+            var clearer = clouds.gameObject.AddComponent<CloudClearer>();
+            var data = new SerializedObject(clearer);
+            data.FindProperty("_player").objectReferenceValue = player;
+            var cloudList = data.FindProperty("_clouds");
+            cloudList.arraySize = list.Length;
+            for (var i = 0; i < list.Length; i++)
+                cloudList.GetArrayElementAtIndex(i).objectReferenceValue = list[i];
+            data.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void CreateMountain(Transform root, Material material)
