@@ -159,6 +159,7 @@ namespace BuyuFisiltisi.EditorTools
                 go.GetComponent<Renderer>().sharedMaterial = material;
 
             go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            DressFlower(go.transform, index, position);
 
             var point = new GameObject("DurmaNoktasi").transform;
             point.SetParent(go.transform, false);
@@ -171,6 +172,24 @@ namespace BuyuFisiltisi.EditorTools
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();
             return flower;
+        }
+
+        private static void DressFlower(Transform flower, int index, Vector3 position)
+        {
+            Object.DestroyImmediate(flower.GetComponent<MeshRenderer>());
+            Object.DestroyImmediate(flower.GetComponent<MeshFilter>());
+
+            var models = new[] { "flower_yellowA", "flower_purpleA", "flower_yellowB", "flower_redA", "flower_purpleC" };
+            PlaceModel(flower, models[index % models.Length], new Vector3(position.x, position.y - 0.4f, position.z), index * 47f, 0.9f);
+
+            var glow = new GameObject("Isilti");
+            glow.transform.SetParent(flower, false);
+            glow.transform.position = position + Vector3.up * 0.4f;
+            var light = glow.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = new Color(1f, 0.9f, 0.45f);
+            light.intensity = 3f;
+            light.range = 2.5f;
         }
 
         private static void CreateClouds(Transform root, Transform player)

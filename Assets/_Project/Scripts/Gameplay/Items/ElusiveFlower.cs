@@ -11,19 +11,20 @@ namespace BuyuFisiltisi.Gameplay.Items
         [SerializeField] private int _escapes = 2;
         [SerializeField] private float _hideSeconds = 0.6f;
 
-        private Renderer _renderer;
+        private Renderer[] _renderers = new Renderer[0];
+        private bool _hidden;
         private int _used;
         private float _visibleAt;
 
         private void Awake()
         {
-            _renderer = GetComponent<Renderer>();
+            _renderers = GetComponentsInChildren<Renderer>();
         }
 
         private void Update()
         {
-            if (_renderer != null && !_renderer.enabled && Time.time >= _visibleAt)
-                _renderer.enabled = true;
+            if (_hidden && Time.time >= _visibleAt)
+                SetVisible(true);
 
             if (_player == null || _used >= _escapes || _spots.Length == 0)
                 return;
@@ -36,13 +37,20 @@ namespace BuyuFisiltisi.Gameplay.Items
             _used++;
             transform.position = _spots[_used % _spots.Length].position;
 
-            if (_renderer != null)
-            {
-                _renderer.enabled = false;
-                _visibleAt = Time.time + _hideSeconds;
-            }
+            SetVisible(false);
+            _visibleAt = Time.time + _hideSeconds;
 
             Debug.Log("[Yalancı Çiçek] Kayboldu! Kaçış: " + _used + "/" + _escapes);
+        }
+
+        private void SetVisible(bool visible)
+        {
+            _hidden = !visible;
+            foreach (var item in _renderers)
+            {
+                if (item != null)
+                    item.enabled = visible;
+            }
         }
     }
 }
