@@ -17,7 +17,9 @@ namespace BuyuFisiltisi.EditorTools
         {
             new Vector3(-4f, 0.4f, 6f),
             new Vector3(3f, 0.4f, 10f),
-            new Vector3(-3f, 0.4f, 15f)
+            new Vector3(-3f, 0.4f, 15f),
+            new Vector3(5f, 0.4f, 8f),
+            new Vector3(-5f, 0.4f, 12f)
         };
 
         [MenuItem("Büyü Fısıltısı/Çiçek Test Düzenini Kur")]
