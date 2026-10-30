@@ -20,8 +20,20 @@ namespace BuyuFisiltisi.EditorTools
         {
             new Vector3(-4f, 0.4f, 38f),
             new Vector3(3f, 0.4f, 42f),
-            new Vector3(0f, 0.4f, 52f)
+            new Vector3(0f, 0.4f, 52f),
+            new Vector3(-5f, 4.1f, 64.9f),
+            new Vector3(5f, 0.4f, 44f)
         };
+
+        private static readonly Vector3[] DecoySpots =
+        {
+            new Vector3(5f, 0.4f, 44f),
+            new Vector3(-5f, 0.4f, 44f),
+            new Vector3(5f, 0.4f, 40f)
+        };
+
+        private const int MountainFlowerIndex = 3;
+        private const int DecoyFlowerIndex = 4;
 
         private const int HiddenFlowerIndex = 2;
         private static readonly Vector3 FlameRespawn = new Vector3(0f, 0.1f, 46f);
@@ -64,6 +76,12 @@ namespace BuyuFisiltisi.EditorTools
 
             flowers[HiddenFlowerIndex].gameObject.AddComponent<FlowerPickupOnTouch>();
             CreateFlames(root, FlowerPositions[HiddenFlowerIndex], material);
+
+            flowers[MountainFlowerIndex].gameObject.AddComponent<FlowerPickupOnTouch>();
+            CreateMountain(root, material);
+
+            flowers[DecoyFlowerIndex].gameObject.AddComponent<FlowerPickupOnTouch>();
+            CreateDecoy(root, flowers[DecoyFlowerIndex], inventory.transform);
 
             var reachable = new CollectibleFlower[HiddenFlowerIndex];
             for (var i = 0; i < reachable.Length; i++)
@@ -141,6 +159,49 @@ namespace BuyuFisiltisi.EditorTools
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();
             return flower;
+        }
+
+        private static void CreateMountain(Transform root, Material material)
+        {
+            var mountain = new GameObject("Dag").transform;
+            mountain.SetParent(root, false);
+
+            for (var i = 0; i < 6; i++)
+            {
+                var height = 0.6f * (i + 1);
+                var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                go.name = "Basamak_" + (i + 1);
+                go.transform.SetParent(mountain, false);
+                go.transform.position = new Vector3(-5f, height / 2f, 55f + 1.8f * i + 0.9f);
+                go.transform.localScale = new Vector3(2.5f, height, 1.8f);
+                go.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+
+                if (material != null)
+                    go.GetComponent<Renderer>().sharedMaterial = material;
+            }
+        }
+
+        private static void CreateDecoy(Transform root, CollectibleFlower flower, Transform player)
+        {
+            var spotsRoot = new GameObject("YalanciCicekNoktalari").transform;
+            spotsRoot.SetParent(root, false);
+
+            var spots = new Transform[DecoySpots.Length];
+            for (var i = 0; i < DecoySpots.Length; i++)
+            {
+                spots[i] = new GameObject("Nokta_" + (i + 1)).transform;
+                spots[i].SetParent(spotsRoot, false);
+                spots[i].position = DecoySpots[i];
+            }
+
+            var elusive = flower.gameObject.AddComponent<ElusiveFlower>();
+            var data = new SerializedObject(elusive);
+            data.FindProperty("_player").objectReferenceValue = player;
+            var list = data.FindProperty("_spots");
+            list.arraySize = spots.Length;
+            for (var i = 0; i < spots.Length; i++)
+                list.GetArrayElementAtIndex(i).objectReferenceValue = spots[i];
+            data.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void CreateFlames(Transform root, Vector3 center, Material material)
