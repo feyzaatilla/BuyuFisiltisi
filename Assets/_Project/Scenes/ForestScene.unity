@@ -2181,6 +2181,7 @@ GameObject:
   - component: {fileID: 624866813}
   - component: {fileID: 624866812}
   - component: {fileID: 624866811}
+  - component: {fileID: 624866814}
   m_Layer: 10
   m_Name: MuhurluKapi
   m_TagString: Untagged
@@ -2281,6 +2282,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 624866809}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &624866814
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 624866809}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2301530089884b73a4a4df942c3cbc04, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BuyuFisiltisi.Gameplay::BuyuFisiltisi.Gameplay.World.SealedDoor
+  _doorId: MuhurluKapi
+  _openOffset: {x: 0, y: -4.5, z: 0}
+  _openSeconds: 2.5
 --- !u!1 &627239871
 GameObject:
   m_ObjectHideFlags: 0
