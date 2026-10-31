@@ -19,6 +19,8 @@ namespace BuyuFisiltisi.Gameplay.Player
         private float _verticalSpeed;
 
         public Vector3 Velocity { get; private set; }
+
+        public float SpeedMultiplier { get; set; } = 1f;
         public bool IsGrounded => _controller != null && _controller.isGrounded;
 
         private void Awake()
@@ -56,7 +58,7 @@ namespace BuyuFisiltisi.Gameplay.Player
             _verticalSpeed = MovementMath.NextVerticalSpeed(_verticalSpeed, grounded, _gravity, Time.deltaTime, _groundStick);
             if (grounded && _input.JumpPressed)
                 _verticalSpeed = MovementMath.JumpSpeed(_jumpHeight, _gravity);
-            var horizontal = direction * speed;
+            var horizontal = direction * (speed * SpeedMultiplier);
             Velocity = new Vector3(horizontal.x, _verticalSpeed, horizontal.z);
             _controller.Move(Velocity * Time.deltaTime);
 
@@ -65,6 +67,11 @@ namespace BuyuFisiltisi.Gameplay.Player
                 var target = Quaternion.LookRotation(direction, Vector3.up);
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, target, _turnSpeed * Time.deltaTime);
             }
+        }
+
+        public void Launch(float upwardSpeed)
+        {
+            _verticalSpeed = upwardSpeed;
         }
 
         public void Respawn(Vector3 position, Quaternion rotation)

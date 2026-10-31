@@ -30,7 +30,7 @@ namespace BuyuFisiltisi.UI.Intro
         {
             "Bu orman bir zamanlar şarkı söylerdi. Bir cadının ihaneti onu susturdu ve Orman Kalbi'nin kapısı mühürlendi.",
             "Önce kara bulutları rüzgâr büyüsüyle dağıt: buluta yaklaş ve sol tıkla. Köprü kalkık; kök duvarındaki yarıktan yalnızca ben geçip şalteri çekebilirim.",
-            "Çiçek Vadisi'nde altı çiçek topla, büyü kazanında üç tarifi demle. Hasta ateş böceğini ve Yaşlı Meşe'nin yaralı kökünü iyileştir.",
+            "Çiçek Vadisi'nde altı çiçek topla, büyü kazanında üç tarifi demle. Hasta ateş böceğini ve Yaşlı Meşe'nin yaralı kökünü iyileştir. Vadide dolaşan Gölge Tilki'ye dikkat et, çiçeklerini çalar.",
             "Kapıyı Yaşlı Meşe korur ve cadılara güvenmez. Onu sözlerinle ve iyiliklerinle ikna et. Bana emir vermek için Tab ile sayfalarımı aç."
         };
 

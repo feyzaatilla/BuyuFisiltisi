@@ -47,6 +47,8 @@ namespace BuyuFisiltisi.EditorTools
 
         private static readonly Vector3 NookFetchPoint = new Vector3(-7.5f, 0f, 44f);
 
+        private static readonly Vector3 ParkourOrigin = new Vector3(70f, -30f, 40f);
+
         private static readonly Vector3 CauldronPosition = new Vector3(2.5f, 0f, 55.5f);
 
         private static readonly Vector3 RootPosition = new Vector3(-1.2f, 0f, 80f);
@@ -168,6 +170,15 @@ namespace BuyuFisiltisi.EditorTools
             bookData.ApplyModifiedPropertiesWithoutUndo();
 
             CreateCauldron(root, book, body != null ? body : witch.transform, inventory);
+            CreateTraps(root, body != null ? body : witch.transform);
+            CreateShadowFox(root, body != null ? body : witch.transform, inventory);
+
+            var touch = new GameObject("SalterDokunusu").AddComponent<BuyuFisiltisi.Gameplay.Commands.SwitchTouchCommand>();
+            touch.transform.SetParent(root, false);
+            var touchData = new SerializedObject(touch);
+            touchData.FindProperty("_switchTarget").objectReferenceValue = bookData.FindProperty("_switchTarget").objectReferenceValue;
+            touchData.FindProperty("_player").objectReferenceValue = body != null ? body : witch.transform;
+            touchData.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.MarkSceneDirty(scene);
             EditorSceneManager.SaveScene(scene);
@@ -398,7 +409,7 @@ namespace BuyuFisiltisi.EditorTools
 
             for (var row = 0; row < 4; row++)
             {
-                for (var z = -6f; z < 96f; z += 2.6f)
+                for (var z = -12f; z < 96f; z += 2.6f)
                 {
                     foreach (var side in new[] { -1f, 1f })
                     {
@@ -413,7 +424,7 @@ namespace BuyuFisiltisi.EditorTools
             {
                 for (var x = -16f; x <= 16f; x += 2.4f)
                 {
-                    PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x + (float)random.NextDouble(), 0f, -6f - row * 2.4f), random.Next(360), 6f + (float)random.NextDouble() * 3f);
+                    PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x + (float)random.NextDouble(), 0f, -13f - row * 2.6f), random.Next(360), 6f + (float)random.NextDouble() * 3f);
                     PlaceModel(forest, trees[random.Next(trees.Length)], new Vector3(x + (float)random.NextDouble(), 0f, 92f + row * 2.4f), random.Next(360), 6f + (float)random.NextDouble() * 3f);
                 }
             }
@@ -857,6 +868,413 @@ namespace BuyuFisiltisi.EditorTools
             data.ApplyModifiedPropertiesWithoutUndo();
         }
 
+        private static void CreateShadowFox(Transform root, Transform player, PlayerInventory inventory)
+        {
+            var fox = new GameObject("GolgeTilki").transform;
+            fox.SetParent(root, false);
+            fox.position = new Vector3(-5f, 0f, 37f);
+
+            var furMaterial = GetColorMaterial("2A1838_Tilki", new Color(0.17f, 0.1f, 0.22f), false);
+            var calmFur = GetColorMaterial("B97A4A_Tilki", new Color(0.73f, 0.48f, 0.29f), false);
+            var eyeMaterial = GetColorMaterial("FF3344_TilkiGoz", new Color(1f, 0.2f, 0.27f), true);
+            var calmEyes = GetColorMaterial("88CCFF_TilkiGoz", new Color(0.53f, 0.8f, 1f), true);
+            var tipMaterial = GetColorMaterial("E8E0F0_Kuyruk", new Color(0.91f, 0.88f, 0.94f), false);
+
+            var body = new GameObject("Gorunum").transform;
+            body.SetParent(fox, false);
+            var fur = new System.Collections.Generic.List<Renderer>();
+            var eyes = new System.Collections.Generic.List<Renderer>();
+
+            Renderer Part(string name, PrimitiveType type, Vector3 position, Vector3 euler, Vector3 scale, Material material)
+            {
+                BugPart(body, name, type, position, euler, scale, material);
+                return body.GetChild(body.childCount - 1).GetComponent<Renderer>();
+            }
+
+            fur.Add(Part("Govde", PrimitiveType.Capsule, new Vector3(0f, 0.42f, 0f), new Vector3(90f, 0f, 0f), new Vector3(0.38f, 0.42f, 0.38f), furMaterial));
+            fur.Add(Part("Bas", PrimitiveType.Sphere, new Vector3(0f, 0.62f, 0.48f), Vector3.zero, new Vector3(0.34f, 0.3f, 0.34f), furMaterial));
+            fur.Add(Part("Burun", PrimitiveType.Sphere, new Vector3(0f, 0.57f, 0.68f), Vector3.zero, new Vector3(0.14f, 0.12f, 0.22f), furMaterial));
+            foreach (var side in new[] { -1f, 1f })
+            {
+                fur.Add(Part("Kulak", PrimitiveType.Cube, new Vector3(side * 0.1f, 0.82f, 0.46f), new Vector3(0f, 0f, side * 20f), new Vector3(0.08f, 0.16f, 0.05f), furMaterial));
+                eyes.Add(Part("Goz", PrimitiveType.Sphere, new Vector3(side * 0.08f, 0.66f, 0.63f), Vector3.zero, new Vector3(0.07f, 0.05f, 0.03f), eyeMaterial));
+                fur.Add(Part("On_Bacak", PrimitiveType.Cylinder, new Vector3(side * 0.12f, 0.15f, 0.22f), Vector3.zero, new Vector3(0.08f, 0.15f, 0.08f), furMaterial));
+                fur.Add(Part("Arka_Bacak", PrimitiveType.Cylinder, new Vector3(side * 0.12f, 0.15f, -0.22f), Vector3.zero, new Vector3(0.08f, 0.15f, 0.08f), furMaterial));
+            }
+            fur.Add(Part("Kuyruk", PrimitiveType.Sphere, new Vector3(0f, 0.55f, -0.55f), new Vector3(-35f, 0f, 0f), new Vector3(0.22f, 0.22f, 0.55f), furMaterial));
+            Part("Kuyruk_Ucu", PrimitiveType.Sphere, new Vector3(0f, 0.72f, -0.78f), new Vector3(-35f, 0f, 0f), new Vector3(0.15f, 0.15f, 0.2f), tipMaterial);
+
+            var glow = new GameObject("Tilki_Isigi").AddComponent<Light>();
+            glow.transform.SetParent(fox, false);
+            glow.transform.localPosition = new Vector3(0f, 1f, 0.3f);
+            glow.color = new Color(0.8f, 0.25f, 0.4f);
+            glow.intensity = 2.5f;
+            glow.range = 4f;
+
+            var patrol = new GameObject("Tilki_Devriye").transform;
+            patrol.SetParent(root, false);
+            var points = new[] { new Vector3(-5f, 0f, 37f), new Vector3(5.5f, 0f, 39f), new Vector3(5.5f, 0f, 48f), new Vector3(-5.5f, 0f, 47f) };
+
+            var component = fox.gameObject.AddComponent<ShadowFox>();
+            var data = new SerializedObject(component);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_inventory").objectReferenceValue = inventory;
+            data.FindProperty("_calmEyes").objectReferenceValue = calmEyes;
+            data.FindProperty("_calmFur").objectReferenceValue = calmFur;
+            data.FindProperty("_glow").objectReferenceValue = glow;
+            var pointList = data.FindProperty("_patrolPoints");
+            pointList.arraySize = points.Length;
+            for (var i = 0; i < points.Length; i++)
+                pointList.GetArrayElementAtIndex(i).objectReferenceValue = TrapRespawn(patrol, "Nokta_" + (i + 1), points[i]);
+            var eyeList = data.FindProperty("_eyes");
+            eyeList.arraySize = eyes.Count;
+            for (var i = 0; i < eyes.Count; i++)
+                eyeList.GetArrayElementAtIndex(i).objectReferenceValue = eyes[i];
+            var furList = data.FindProperty("_fur");
+            furList.arraySize = fur.Count;
+            for (var i = 0; i < fur.Count; i++)
+                furList.GetArrayElementAtIndex(i).objectReferenceValue = fur[i];
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateTraps(Transform root, Transform player)
+        {
+            var traps = new GameObject("Tuzaklar").transform;
+            traps.SetParent(root, false);
+
+            var parkourStart = CreateRootParkour(root, player);
+            CreateHiddenVortex(traps, player, parkourStart, new Vector3(0f, 0f, 71f));
+        }
+
+        private static Transform TrapRespawn(Transform parent, string name, Vector3 position)
+        {
+            var point = new GameObject(name).transform;
+            point.SetParent(parent, false);
+            point.position = position;
+            return point;
+        }
+
+        private static void WireTrap(Component trap, Transform player, Transform respawn, string warning)
+        {
+            var data = new SerializedObject(trap);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_respawnPoint").objectReferenceValue = respawn;
+            if (warning != null)
+                data.FindProperty("_warning").stringValue = warning;
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static Transform CreateRootParkour(Transform root, Transform player)
+        {
+            var course = new GameObject("KokParkuru").transform;
+            course.SetParent(root, false);
+            course.position = ParkourOrigin;
+
+            course.gameObject.AddComponent<RootParkour>();
+            var stone = GetColorMaterial("3E4A3A_Yosun", new Color(0.24f, 0.29f, 0.22f), false);
+            var wood = GetColorMaterial("5A3B22_Kok", new Color(0.35f, 0.23f, 0.13f), false);
+            var dark = GetColorMaterial("140C1E_Ucurum", new Color(0.08f, 0.05f, 0.12f), false);
+            var glow = GetColorMaterial("6CFFC8_KokIsigi", new Color(0.42f, 1f, 0.78f), true);
+
+            ParkourBlock(course, "Baslangic", new Vector3(0f, 0f, 0f), new Vector3(5f, 1f, 5f), stone);
+            ParkourBlock(course, "Tas_1", new Vector3(0f, 0f, 4.6f), new Vector3(2.2f, 1f, 2.2f), stone);
+            ParkourBlock(course, "Tas_2", new Vector3(1.6f, 0.3f, 8f), new Vector3(2f, 1f, 2f), stone);
+            ParkourBlock(course, "Tas_3", new Vector3(-1f, 0.6f, 11.4f), new Vector3(2f, 1f, 2f), stone);
+
+            var mover = ParkourBlock(course, "Kayan_Kutuk", new Vector3(0f, 0.6f, 15f), new Vector3(2.4f, 0.6f, 2.4f), wood);
+            var moving = mover.gameObject.AddComponent<MovingPlatform>();
+            var movingData = new SerializedObject(moving);
+            movingData.FindProperty("_travel").vector3Value = new Vector3(6f, 0f, 0f);
+            movingData.FindProperty("_speed").floatValue = 0.35f;
+            movingData.FindProperty("_player").objectReferenceValue = player;
+            movingData.ApplyModifiedPropertiesWithoutUndo();
+
+            ParkourBlock(course, "Dinlenme", new Vector3(0f, 0.6f, 19.2f), new Vector3(3.4f, 1f, 3.4f), stone);
+            var checkpoint = ParkourPoint(course, "KontrolNoktasi", new Vector3(0f, 1.6f, 18.6f));
+            ParkourGlow(course, new Vector3(0f, 1.2f, 18.6f), glow);
+
+            var pad = new GameObject("ZiplamaMantari").transform;
+            pad.SetParent(course, false);
+            pad.localPosition = new Vector3(0f, 0.6f, 20.3f);
+            var cap = PlaceModel(pad, "mushroom_tanTall", pad.position, 0f, 1f);
+            var padLight = new GameObject("Mantar_Isigi").AddComponent<Light>();
+            padLight.transform.SetParent(pad, false);
+            padLight.transform.localPosition = new Vector3(0f, 1f, 0f);
+            padLight.color = new Color(1f, 0.8f, 0.4f);
+            padLight.intensity = 3f;
+            padLight.range = 4f;
+            var jump = pad.gameObject.AddComponent<JumpMushroom>();
+            var jumpData = new SerializedObject(jump);
+            jumpData.FindProperty("_player").objectReferenceValue = player;
+            jumpData.FindProperty("_cap").objectReferenceValue = cap != null ? cap.transform : null;
+            jumpData.ApplyModifiedPropertiesWithoutUndo();
+
+            ParkourBlock(course, "Yuksek_Tas", new Vector3(0f, 3.6f, 23.6f), new Vector3(3f, 1f, 3f), stone);
+            for (var i = 0; i < 6; i++)
+                ParkourBlock(course, "Merdiven_" + (i + 1), new Vector3(2.6f, 1f + i * 0.5f, 19.6f + i * 1.1f), new Vector3(1.6f, 1f, 1.1f), stone);
+            ParkourBlock(course, "Kok_Kopru", new Vector3(0f, 3.6f, 28f), new Vector3(0.9f, 0.5f, 5.6f), wood);
+            CreateSwingingLog(course, player, new Vector3(0f, 7.8f, 28f), wood);
+            ParkourBlock(course, "Basamak_1", new Vector3(1.4f, 3.2f, 32.4f), new Vector3(1.6f, 1f, 1.6f), stone);
+            ParkourBlock(course, "Basamak_2", new Vector3(-0.6f, 2.8f, 35f), new Vector3(1.6f, 1f, 1.6f), stone);
+            ParkourBlock(course, "Basamak_3", new Vector3(1f, 2.4f, 37.6f), new Vector3(1.6f, 1f, 1.6f), stone);
+            ParkourBlock(course, "Diken_Koridoru", new Vector3(0f, 2.4f, 42.5f), new Vector3(3f, 1f, 6f), stone);
+            var corridorPoint = ParkourPoint(course, "KoridorNoktasi", new Vector3(0f, 3.4f, 40.2f));
+            ParkourGlow(course, new Vector3(-1.3f, 3f, 40.2f), glow);
+            CreateParkourThorns(course, player, new Vector3(0f, 2.4f, 42.2f), 0f);
+            CreateParkourThorns(course, player, new Vector3(0f, 2.4f, 44.4f), 1.4f);
+
+            ParkourBlock(course, "Bulmaca_Odasi", new Vector3(0f, 2.4f, 50f), new Vector3(9f, 1f, 8f), stone);
+            var exit = ParkourPoint(course, "CikisKapisi", new Vector3(0f, 3.4f, 53.2f));
+            var exitVisual = new GameObject("Cikis_Gorunum");
+            exitVisual.transform.SetParent(course, false);
+            var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            ring.name = "Cikis_Isigi";
+            ring.transform.SetParent(exitVisual.transform, false);
+            ring.transform.localPosition = new Vector3(0f, 3.6f, 53.6f);
+            ring.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            ring.transform.localScale = new Vector3(1.8f, 0.05f, 2.6f);
+            Object.DestroyImmediate(ring.GetComponent<Collider>());
+            ring.GetComponent<Renderer>().sharedMaterial = glow;
+            ParkourGlow(exitVisual.transform, new Vector3(0f, 4.2f, 53f), glow);
+            var puzzle = CreateRunePuzzle(course, player, exitVisual);
+
+            var hall = new GameObject("Magara_Duvarlari").transform;
+            hall.SetParent(course, false);
+            foreach (var (position, size) in new[]
+            {
+                (new Vector3(-9f, 0f, 26f), new Vector3(1f, 26f, 62f)),
+                (new Vector3(9f, 0f, 26f), new Vector3(1f, 26f, 62f)),
+                (new Vector3(0f, 0f, -5f), new Vector3(19f, 26f, 1f)),
+                (new Vector3(0f, 0f, 57f), new Vector3(19f, 26f, 1f)),
+                (new Vector3(0f, 12f, 26f), new Vector3(19f, 1f, 62f)),
+                (new Vector3(0f, -9f, 26f), new Vector3(19f, 1f, 62f))
+            })
+            {
+                var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                wall.name = "Duvar";
+                wall.transform.SetParent(hall, false);
+                wall.transform.localPosition = position;
+                wall.transform.localScale = size;
+                Object.DestroyImmediate(wall.GetComponent<Collider>());
+                wall.GetComponent<Renderer>().sharedMaterial = dark;
+            }
+
+            var random = new System.Random(5);
+            for (var i = 0; i < 18; i++)
+            {
+                var hanging = new Vector3((float)random.NextDouble() * 14f - 7f, 9f, (float)random.NextDouble() * 46f - 2f);
+                var length = 2f + (float)random.NextDouble() * 4f;
+                BugPart(course, "Sarkik_Kok", PrimitiveType.Cylinder, hanging - Vector3.up * (length * 0.5f) + ParkourOrigin - course.position, new Vector3((float)random.NextDouble() * 20f - 10f, 0f, (float)random.NextDouble() * 20f - 10f), new Vector3(0.15f, length * 0.5f, 0.15f), wood);
+                if (i % 3 == 0)
+                    ParkourGlow(course, hanging - Vector3.up * length, glow);
+            }
+
+            var parkour = course.GetComponent<RootParkour>();
+            var start = ParkourPoint(course, "BaslangicNoktasi", new Vector3(0f, 1.6f, -0.5f));
+            var surface = TrapRespawn(root, "Parkur_Donus", new Vector3(0.5f, 1f, 75.5f));
+            var data = new SerializedObject(parkour);
+            data.FindProperty("_player").objectReferenceValue = player;
+            var checkpoints = data.FindProperty("_checkpoints");
+            checkpoints.arraySize = 3;
+            checkpoints.GetArrayElementAtIndex(0).objectReferenceValue = start;
+            checkpoints.GetArrayElementAtIndex(1).objectReferenceValue = checkpoint;
+            checkpoints.GetArrayElementAtIndex(2).objectReferenceValue = corridorPoint;
+            data.FindProperty("_puzzle").objectReferenceValue = puzzle;
+            data.FindProperty("_exit").objectReferenceValue = exit;
+            data.FindProperty("_surfacePoint").objectReferenceValue = surface;
+            data.ApplyModifiedPropertiesWithoutUndo();
+            return start;
+        }
+
+        private static void CreateParkourThorns(Transform course, Transform player, Vector3 localPosition, float offset)
+        {
+            var trap = new GameObject("DikenTuzagi").transform;
+            trap.SetParent(course, false);
+            trap.localPosition = localPosition;
+
+            var spikes = new GameObject("Dikenler").transform;
+            spikes.SetParent(trap, false);
+            var thorn = GetColorMaterial("3B4A1E_Diken", new Color(0.23f, 0.29f, 0.12f), false);
+            var tip = GetColorMaterial("C8324B_DikenUcu", new Color(0.78f, 0.2f, 0.3f), false);
+            for (var x = -1.2f; x <= 1.21f; x += 0.4f)
+            {
+                for (var z = -0.4f; z <= 0.41f; z += 0.4f)
+                {
+                    BugPart(spikes, "Diken", PrimitiveType.Cylinder, new Vector3(x, 0.35f, z), Vector3.zero, new Vector3(0.08f, 0.35f, 0.08f), thorn);
+                    BugPart(spikes, "Diken_Ucu", PrimitiveType.Sphere, new Vector3(x, 0.72f, z), Vector3.zero, Vector3.one * 0.1f, tip);
+                }
+            }
+
+            var component = trap.gameObject.AddComponent<ThornTrap>();
+            var data = new SerializedObject(component);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_parkour").objectReferenceValue = course.GetComponent<RootParkour>();
+            data.FindProperty("_spikes").objectReferenceValue = spikes;
+            data.FindProperty("_offset").floatValue = offset;
+            data.FindProperty("_hitRadius").floatValue = 1.5f;
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void CreateSwingingLog(Transform course, Transform player, Vector3 pivotPosition, Material wood)
+        {
+            var pivot = new GameObject("Sallanan_Kutuk").transform;
+            pivot.SetParent(course, false);
+            pivot.localPosition = pivotPosition;
+            BugPart(pivot, "Ip", PrimitiveType.Cylinder, new Vector3(0f, -1.6f, 0f), Vector3.zero, new Vector3(0.06f, 1.6f, 0.06f), wood);
+            BugPart(pivot, "Kutuk", PrimitiveType.Cylinder, new Vector3(0f, -3.4f, 0f), new Vector3(90f, 0f, 0f), new Vector3(0.7f, 0.8f, 0.7f), wood);
+
+            var component = pivot.gameObject.AddComponent<SwingingLog>();
+            var data = new SerializedObject(component);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_parkour").objectReferenceValue = course.GetComponent<RootParkour>();
+            data.FindProperty("_log").objectReferenceValue = pivot.GetChild(1);
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static RunePuzzle CreateRunePuzzle(Transform course, Transform player, GameObject exitVisual)
+        {
+            var room = new GameObject("TasBulmacasi").transform;
+            room.SetParent(course, false);
+
+            var pillar = GetColorMaterial("4A4458_Sutun", new Color(0.29f, 0.27f, 0.35f), false);
+            var stones = new[]
+            {
+                ("Güneş taşı", new Vector3(-3f, 2.4f, 50.5f), new Color(1f, 0.6f, 0.2f)),
+                ("Ay taşı", new Vector3(0f, 2.4f, 52f), new Color(0.75f, 0.85f, 1f)),
+                ("Yıldız taşı", new Vector3(3f, 2.4f, 50.5f), new Color(1f, 0.95f, 0.45f))
+            };
+
+            var stoneTransforms = new Transform[stones.Length];
+            var lights = new Light[stones.Length];
+            var names = new string[stones.Length];
+            for (var i = 0; i < stones.Length; i++)
+            {
+                var (name, position, color) = stones[i];
+                var stone = new GameObject(name).transform;
+                stone.SetParent(room, false);
+                stone.localPosition = position;
+                BugPart(stone, "Sutun", PrimitiveType.Cylinder, new Vector3(0f, 0.6f, 0f), Vector3.zero, new Vector3(0.6f, 0.6f, 0.6f), pillar);
+                var crystal = GetColorMaterial(ColorUtility.ToHtmlStringRGB(color) + "_Kristal", color, true);
+                if (i == 2)
+                    BugPart(stone, "Kristal", PrimitiveType.Cube, new Vector3(0f, 1.55f, 0f), new Vector3(45f, 0f, 45f), Vector3.one * 0.35f, crystal);
+                else
+                    BugPart(stone, "Kristal", PrimitiveType.Sphere, new Vector3(0f, 1.55f, 0f), Vector3.zero, Vector3.one * (i == 0 ? 0.5f : 0.38f), crystal);
+
+                var light = new GameObject("Tas_Isigi").AddComponent<Light>();
+                light.transform.SetParent(stone, false);
+                light.transform.localPosition = new Vector3(0f, 1.9f, 0f);
+                light.color = color;
+                light.range = 5f;
+                stoneTransforms[i] = stone;
+                lights[i] = light;
+                names[i] = name;
+            }
+
+            var hint = ParkourPoint(room, "Yazi_Noktasi", new Vector3(0f, 3.4f, 46.8f));
+            BugPart(room, "Yazi_Tableti", PrimitiveType.Cube, new Vector3(0f, 4.2f, 56.4f), Vector3.zero, new Vector3(3f, 1.2f, 0.1f), GetColorMaterial("FFE6A0_Yazi", new Color(1f, 0.9f, 0.63f), true));
+
+            var component = room.gameObject.AddComponent<RunePuzzle>();
+            var data = new SerializedObject(component);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_exit").objectReferenceValue = exitVisual;
+            data.FindProperty("_hintPoint").objectReferenceValue = hint;
+            var stoneList = data.FindProperty("_stones");
+            var nameList = data.FindProperty("_names");
+            var lightList = data.FindProperty("_lights");
+            stoneList.arraySize = stones.Length;
+            nameList.arraySize = stones.Length;
+            lightList.arraySize = stones.Length;
+            for (var i = 0; i < stones.Length; i++)
+            {
+                stoneList.GetArrayElementAtIndex(i).objectReferenceValue = stoneTransforms[i];
+                nameList.GetArrayElementAtIndex(i).stringValue = names[i];
+                lightList.GetArrayElementAtIndex(i).objectReferenceValue = lights[i];
+            }
+            var order = data.FindProperty("_order");
+            order.arraySize = 3;
+            order.GetArrayElementAtIndex(0).intValue = 1;
+            order.GetArrayElementAtIndex(1).intValue = 2;
+            order.GetArrayElementAtIndex(2).intValue = 0;
+            data.ApplyModifiedPropertiesWithoutUndo();
+            return component;
+        }
+
+        private static Transform ParkourBlock(Transform parent, string name, Vector3 topCenter, Vector3 size, Material material)
+        {
+            var block = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            block.name = name;
+            block.layer = BuyuFisiltisi.Core.Navigation.GameLayers.Ground;
+            block.transform.SetParent(parent, false);
+            block.transform.localPosition = topCenter - Vector3.up * (size.y * 0.5f);
+            block.transform.localScale = size;
+            block.GetComponent<Renderer>().sharedMaterial = material;
+            block.AddComponent<NavMeshModifier>().ignoreFromBuild = true;
+            return block.transform;
+        }
+
+        private static Transform ParkourPoint(Transform parent, string name, Vector3 localPosition)
+        {
+            var point = new GameObject(name).transform;
+            point.SetParent(parent, false);
+            point.localPosition = localPosition;
+            return point;
+        }
+
+        private static void ParkourGlow(Transform parent, Vector3 localPosition, Material material)
+        {
+            BugPart(parent, "Kok_Isigi", PrimitiveType.Sphere, localPosition, Vector3.zero, Vector3.one * 0.25f, material);
+            var light = new GameObject("Kok_Isik").AddComponent<Light>();
+            light.transform.SetParent(parent, false);
+            light.transform.localPosition = localPosition;
+            light.color = new Color(0.45f, 1f, 0.8f);
+            light.intensity = 3f;
+            light.range = 7f;
+        }
+
+        private static void CreateHiddenVortex(Transform parent, Transform player, Transform destination, Vector3 position)
+        {
+            var vortex = new GameObject("GizliGirdap").transform;
+            vortex.SetParent(parent, false);
+            vortex.position = position;
+
+            var swirl = new GameObject("Girdap_Gorunum").transform;
+            swirl.SetParent(vortex, false);
+            var dark = GetColorMaterial("140C1E_Ucurum", new Color(0.08f, 0.05f, 0.12f), false);
+            var purple = GetColorMaterial("9B5CFF_Girdap", new Color(0.61f, 0.36f, 1f), true);
+            BugPart(swirl, "Girdap_Merkez", PrimitiveType.Cylinder, Vector3.zero, Vector3.zero, new Vector3(1f, 0.01f, 1f), dark);
+            for (var i = 0; i < 6; i++)
+            {
+                var angle = i * 60f;
+                var arm = Quaternion.Euler(0f, angle, 0f) * new Vector3(0.35f, 0.01f, 0f);
+                BugPart(swirl, "Girdap_Kol", PrimitiveType.Cube, arm, new Vector3(0f, angle + 30f, 0f), new Vector3(0.6f, 0.01f, 0.08f), purple);
+            }
+            var light = new GameObject("Girdap_Isigi").AddComponent<Light>();
+            light.transform.SetParent(swirl, false);
+            light.transform.localPosition = Vector3.up * 0.5f;
+            light.color = new Color(0.6f, 0.35f, 1f);
+            light.intensity = 5f;
+            light.range = 5f;
+
+            var hint = new GameObject("Girdap_Izi").transform;
+            hint.SetParent(vortex, false);
+            hint.localPosition = new Vector3(0f, 0.03f, 0f);
+            for (var i = 0; i < 8; i++)
+            {
+                var angle = i * 45f;
+                var leaf = Quaternion.Euler(0f, angle, 0f) * new Vector3(1.1f, 0f, 0f);
+                BugPart(hint, "Iz_Yaprak", PrimitiveType.Cube, leaf, new Vector3(0f, angle + 40f, 0f), new Vector3(0.45f, 0.02f, 0.12f), purple);
+            }
+
+            var component = vortex.gameObject.AddComponent<HiddenVortex>();
+            var data = new SerializedObject(component);
+            data.FindProperty("_player").objectReferenceValue = player;
+            data.FindProperty("_destination").objectReferenceValue = destination;
+            data.FindProperty("_swirl").objectReferenceValue = swirl;
+            data.FindProperty("_hint").objectReferenceValue = hint;
+            data.FindProperty("_areaSize").vector3Value = new Vector3(24f, 6f, 5f);
+            data.ApplyModifiedPropertiesWithoutUndo();
+        }
+
         private static void CreateOuterGround(Transform parent, string name, Vector3 position, Vector3 size, Material material)
         {
             var piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -1251,6 +1669,8 @@ namespace BuyuFisiltisi.EditorTools
             var data = new SerializedObject(firefly);
             data.FindProperty("_inventory").objectReferenceValue = inventory;
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
+            data.FindProperty("_player").objectReferenceValue = Object.FindFirstObjectByType<BuyuFisiltisi.Gameplay.Player.WitchMotor>()?.transform;
+            data.FindProperty("_glow").objectReferenceValue = light;
             data.ApplyModifiedPropertiesWithoutUndo();
             return firefly;
         }

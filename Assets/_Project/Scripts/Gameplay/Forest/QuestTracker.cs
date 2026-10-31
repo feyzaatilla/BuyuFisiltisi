@@ -20,13 +20,15 @@ namespace BuyuFisiltisi.Gameplay.Forest
         private const int FlowersNeeded = 6;
         private const float ToastSeconds = 4f;
 
+        private bool _talking;
+
         private readonly QuestLog _log = new QuestLog(new[]
         {
             new QuestStep(CloudsStep, "Kara bulutlara yaklaş, sol tıkla dağıt"),
-            new QuestStep(BridgeStep, "Kitaptan (Tab) Fısıl'a şalteri çektir, köprüyü indir"),
+            new QuestStep(BridgeStep, "Şaltere yaklaş ya da tıkla, Fısıl çeksin ve köprü insin"),
             new QuestStep(FlowersStep, "Altı çiçeği topla (girintidekini kitaptan Fısıl'a getirt)"),
             new QuestStep(TeaStep, "Büyü kazanına tıkla, üç tarifi demle"),
-            new QuestStep(FireflyStep, "Kitaptan Fısıl'la ateş böceğine çay götür"),
+            new QuestStep(FireflyStep, "Işık Çayıyla ateş böceğine git, ona dokun"),
             new QuestStep(RootStep, "Meşe'nin yaralı köküne merhem sür"),
             new QuestStep(TalkStep, "Yaşlı Meşe'ye git, E ile konuş"),
             new QuestStep(DoorStep, "Meşe'nin güvenini kazan, kapıyı açtır")
@@ -72,7 +74,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             _eventBus.Subscribe<ItemCollectedEvent>(OnItemCollected);
             _eventBus.Subscribe<RecipeCompletedEvent>(OnRecipeCompleted);
             _eventBus.Subscribe<DeedRecordedEvent>(OnDeedRecorded);
-            _eventBus.Subscribe<TrustChangedEvent>(OnTrustChanged);
+            _eventBus.Subscribe<DialogueFocusChangedEvent>(OnDialogueFocusChanged);
             _eventBus.Subscribe<DoorOpenRequestedEvent>(OnDoorOpenRequested);
         }
 
@@ -86,7 +88,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             _eventBus.Unsubscribe<ItemCollectedEvent>(OnItemCollected);
             _eventBus.Unsubscribe<RecipeCompletedEvent>(OnRecipeCompleted);
             _eventBus.Unsubscribe<DeedRecordedEvent>(OnDeedRecorded);
-            _eventBus.Unsubscribe<TrustChangedEvent>(OnTrustChanged);
+            _eventBus.Unsubscribe<DialogueFocusChangedEvent>(OnDialogueFocusChanged);
             _eventBus.Unsubscribe<DoorOpenRequestedEvent>(OnDoorOpenRequested);
         }
 
@@ -129,9 +131,12 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 Complete(RootStep);
         }
 
-        private void OnTrustChanged(TrustChangedEvent changed)
+        private void OnDialogueFocusChanged(DialogueFocusChangedEvent focus)
         {
-            Complete(TalkStep);
+            if (focus.IsActive)
+                _talking = true;
+            else if (_talking)
+                Complete(TalkStep);
         }
 
         private void OnDoorOpenRequested(DoorOpenRequestedEvent requested)
@@ -187,7 +192,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             var width = Screen.width;
             GUI.Label(new Rect(0f, Screen.height - 190f, width, 70f), "Görev: " + CurrentText(), _taskStyle);
 
-            if (Time.unscaledTime < _toastUntil || _log.IsFinished)
+            if (Time.unscaledTime < _toastUntil)
                 GUI.Label(new Rect(0f, Screen.height - 240f, width, 50f), _toast, _toastStyle);
         }
     }

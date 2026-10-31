@@ -151,8 +151,6 @@ namespace BuyuFisiltisi.Gameplay.Book
                     _note = "Getirilecek çiçek kalmadı.";
             }
 
-            if (Button(area, ref y, "Ateş böceğine çay götür") && _fireflyTarget is IInteractable firefly)
-                Send(CompanionCommand.InteractWith(firefly), "Fısıl: Çayı ben götürürüm, dökme sakın.");
         }
 
         private void DrawWhisper(Rect area)
