@@ -1,3 +1,4 @@
+using BuyuFisiltisi.Core.Items;
 using BuyuFisiltisi.Gameplay.Forest;
 using BuyuFisiltisi.Gameplay.Items;
 using Unity.AI.Navigation;
@@ -19,7 +20,14 @@ namespace BuyuFisiltisi.EditorTools
             new Vector3(3f, 0.4f, 10f),
             new Vector3(-3f, 0.4f, 15f),
             new Vector3(5f, 0.4f, 8f),
-            new Vector3(-5f, 0.4f, 12f)
+            new Vector3(-5f, 0.4f, 12f),
+            new Vector3(0f, 0.4f, 18f)
+        };
+
+        private static readonly string[] FlowerItems =
+        {
+            ItemCatalog.SilverHyacinth, ItemCatalog.NightViolet, ItemCatalog.RedWhistleWeed,
+            ItemCatalog.MistFlower, ItemCatalog.RootPomegranate, ItemCatalog.SilverHyacinth
         };
 
         [MenuItem("Büyü Fısıltısı/Çiçek Test Düzenini Kur")]
@@ -179,7 +187,9 @@ namespace BuyuFisiltisi.EditorTools
 
             var flower = go.AddComponent<CollectibleFlower>();
             var data = new SerializedObject(flower);
-            data.FindProperty("_interactionId").stringValue = "isik_cicegi_" + (index + 1);
+            data.FindProperty("_interactionId").stringValue = "cicek_" + (index + 1);
+            data.FindProperty("_itemId").stringValue = FlowerItems[index];
+            data.FindProperty("_displayName").stringValue = ItemCatalog.GetName(FlowerItems[index]);
             data.FindProperty("_inventory").objectReferenceValue = inventory;
             data.FindProperty("_interactionPoint").objectReferenceValue = point;
             data.ApplyModifiedPropertiesWithoutUndo();

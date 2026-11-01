@@ -25,8 +25,18 @@ namespace BuyuFisiltisi.Gameplay.Items
             if (!keyboard.tKey.wasPressedThisFrame)
                 return;
 
-            var brewed = _brewer.TryBrew(Recipe.LightTea);
-            Debug.Log(brewed ? "[Çay] Işık Çayı demlendi." : "[Çay] Yeterli ışık çiçeği yok.");
+            var brewedAny = false;
+            foreach (var recipe in Recipe.All)
+            {
+                if (!_brewer.TryBrew(recipe))
+                    continue;
+
+                brewedAny = true;
+                Debug.Log("[Kazan] " + ItemCatalog.GetName(recipe.ProductId) + " demlendi.");
+            }
+
+            if (!brewedAny)
+                Debug.Log("[Kazan] Hiçbir tarif için malzeme yetmiyor.");
         }
     }
 }

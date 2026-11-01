@@ -1,15 +1,14 @@
 using BuyuFisiltisi.Core.Interaction;
+using BuyuFisiltisi.Core.Items;
 using UnityEngine;
 
 namespace BuyuFisiltisi.Gameplay.Items
 {
     public sealed class CollectibleFlower : MonoBehaviour, IInteractable
     {
-        public const string LightFlowerId = "isik_cicegi";
-
-        [SerializeField] private string _interactionId = "isik_cicegi_1";
-        [SerializeField] private string _displayName = "Işık Çiçeği";
-        [SerializeField] private string _itemId = LightFlowerId;
+        [SerializeField] private string _interactionId = "cicek_1";
+        [SerializeField] private string _displayName = "Gümüş Sümbül";
+        [SerializeField] private string _itemId = ItemCatalog.SilverHyacinth;
         [SerializeField] private PlayerInventory _inventory;
         [SerializeField] private Transform _interactionPoint;
         [SerializeField] private Transform _focusPoint;
