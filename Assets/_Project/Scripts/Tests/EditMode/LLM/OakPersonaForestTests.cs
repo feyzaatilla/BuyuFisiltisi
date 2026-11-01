@@ -30,5 +30,34 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
 
             StringAssert.Contains("- Ateş böceği iyileştirildi.", prompt);
         }
+
+        [Test]
+        public void Prompt_UsesSpellBookInsteadOfOldKeys()
+        {
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(), null);
+
+            StringAssert.Contains("Büyü Kitabı", prompt);
+            StringAssert.DoesNotContain("B emri", prompt);
+            StringAssert.DoesNotContain("F ile", prompt);
+        }
+
+        [Test]
+        public void Prompt_KnowsNewForestPlaces()
+        {
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(), null);
+
+            StringAssert.Contains("kazan", prompt);
+            StringAssert.Contains("Sessizlik Merhemi", prompt);
+            StringAssert.Contains("kara bulut", prompt);
+            StringAssert.Contains("kök parkuru", prompt);
+        }
+
+        [Test]
+        public void Prompt_TellsOakToNameKnownDeeds()
+        {
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(), null);
+
+            StringAssert.Contains("adıyla an", prompt);
+        }
     }
 }
