@@ -15,10 +15,27 @@ namespace BuyuFisiltisi.Core.Items
             _eventBus = eventBus ?? throw new ArgumentNullException(nameof(eventBus));
         }
 
+        public bool CanBrew(Recipe recipe)
+        {
+            if (recipe == null)
+                return false;
+
+            foreach (var ingredient in recipe.Ingredients)
+            {
+                if (_inventory.Count(ingredient.ItemId) < ingredient.Amount)
+                    return false;
+            }
+
+            return true;
+        }
+
         public bool TryBrew(Recipe recipe)
         {
-            if (recipe == null || !_inventory.TryConsume(recipe.IngredientId, recipe.IngredientAmount))
+            if (!CanBrew(recipe))
                 return false;
+
+            foreach (var ingredient in recipe.Ingredients)
+                _inventory.TryConsume(ingredient.ItemId, ingredient.Amount);
 
             _inventory.Add(recipe.ProductId);
             _eventBus.Publish(new RecipeCompletedEvent(recipe.Id));
