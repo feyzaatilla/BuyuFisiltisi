@@ -42,7 +42,10 @@ namespace BuyuFisiltisi.LLM.Dialogue
             "getird",
             "demled",
             "yaptım",
-            "yaptık"
+            "yaptık",
+            "sakinleştird",
+            "çözd",
+            "geçtim"
         });
 
         private static readonly string[] Subjects = FoldAll(new[]
@@ -50,7 +53,10 @@ namespace BuyuFisiltisi.LLM.Dialogue
             "ateş böce",
             "kök",
             "bulut",
-            "parkur"
+            "parkur",
+            "tilki",
+            "mağara",
+            "bulmaca"
         });
 
         public static OakClaimVerdict Judge(string playerText, IReadOnlyList<string> deeds)
