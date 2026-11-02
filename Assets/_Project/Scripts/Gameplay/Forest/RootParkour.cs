@@ -31,7 +31,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_player == null || _checkpoints.Length == 0 || _checkpoints[0] == null)
                 return;
 
-            var inside = Mathf.Abs(_player.position.x - transform.position.x) < 30f && Mathf.Abs(_player.position.z - transform.position.z) < 40f && _player.position.y < transform.position.y + 15f;
+            var inside = Mathf.Abs(_player.position.x - transform.position.x) < 30f && Mathf.Abs(_player.position.z - transform.position.z) < 60f && _player.position.y < transform.position.y + 15f;
             if (!inside)
                 return;
 

@@ -62,6 +62,30 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
             Assert.AreEqual(OakClaimVerdict.Lie, OakClaimGuard.Judge("Kökünü iyileştirdim.", NoDeeds));
         }
 
+        [TestCase("Gölge Tilki'yi sakinleştirdim.")]
+        [TestCase("Mağaradaki taş bulmacayı çözdüm.")]
+        [TestCase("Girdaptaki mağarayı geçtim.")]
+        public void Judge_NewDeedClaimWithoutDeed_IsLie(string text)
+        {
+            Assert.AreEqual(OakClaimVerdict.Lie, OakClaimGuard.Judge(text, NoDeeds));
+        }
+
+        [Test]
+        public void Judge_FoxClaimWithFoxDeed_IsHonest()
+        {
+            var deeds = new[] { "Gölge Tilki'ye zarar vermek yerine onu sakinleştirip sevdi." };
+
+            Assert.AreEqual(OakClaimVerdict.Honest, OakClaimGuard.Judge("Tilkiyi sakinleştirdim.", deeds));
+        }
+
+        [Test]
+        public void Judge_CaveClaimWithCaveDeed_IsHonest()
+        {
+            var deeds = new[] { "Gizli girdabın altındaki tuzaklı mağarayı geçip taş bulmacasını çözdü." };
+
+            Assert.AreEqual(OakClaimVerdict.Honest, OakClaimGuard.Judge("Mağaradaki bulmacayı çözdüm.", deeds));
+        }
+
         [Test]
         public void Judge_EmptyText_IsHonest()
         {
