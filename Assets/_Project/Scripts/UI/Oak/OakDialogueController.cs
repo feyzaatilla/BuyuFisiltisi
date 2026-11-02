@@ -163,8 +163,8 @@ namespace BuyuFisiltisi.UI.Oak
             _buffer.Clear();
             _view.SetPrompt(string.Empty);
             _view.SetOpen(true);
-            _view.ShowPlayer(string.Empty);
-            _view.ShowReply(_warming ? WakingText : ListeningText);
+            _view.ShowPlayer(_warming ? WakingText : ListeningText);
+            _view.ShowReply(OakGreeting.Build(EnsureSession().Deeds, EnsureSession().Trust));
             RefreshTrust();
             ShowInput();
             _bus?.Publish(new DialogueFocusChangedEvent(true));
@@ -251,7 +251,18 @@ namespace BuyuFisiltisi.UI.Oak
 
         private void OnDeedRecorded(DeedRecordedEvent recorded)
         {
-            EnsureSession().AddDeed(recorded.Description);
+            var session = EnsureSession();
+            var previous = session.Trust.Current;
+            if (!session.AddDeed(recorded.Description))
+                return;
+
+            session.Trust.Apply(OakGreeting.DeedTrustBonus);
+            var current = session.Trust.Current;
+            Debug.Log($"[Meşe] İyilik öğrendi: {recorded.Description} Güven: {previous} -> {current}", this);
+            RefreshTrust();
+
+            if (current != previous)
+                _bus?.Publish(new TrustChangedEvent(previous, current, current - previous));
         }
 
         private OakDialogueSession EnsureSession()
