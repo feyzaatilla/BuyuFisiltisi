@@ -43,12 +43,19 @@ namespace BuyuFisiltisi.LLM.Dialogue
             text.AppendLine("- Yol ya da yardım isteyen cadıya give_hint ile kısa bir ipucu ver.");
             text.AppendLine("- attack yalnızca cadı ormana zarar vermekle tehdit ederse.");
             text.AppendLine("- Cadının iyiliklerini yalnızca aşağıdaki listeden bilirsin. Listede olmayan bir iyiliği anlatırsa ona inanma.");
+            text.AppendLine("- Listedeki iyilikleri gerçekten gördün. Cadı iyiliklerini sorarsa ya da anlatırsa onları adıyla an ve teşekkür et.");
             text.AppendLine("- give_hint verirken aşağıdaki orman bilgisinden birini kısaca anlat, yeni yer ya da nesne uydurma.");
+            text.AppendLine("- Cadı ne yapması gerektiğini sorarsa ya da ipucu isterse, yapılmamış iyilikler listesindeki ilk maddeyi give_hint ile söyle.");
             text.AppendLine();
             text.AppendLine("Orman bilgisi:");
             text.AppendLine("- Girişteki uçurumun üstünde bir köprü var. Köprüyü indiren şalter dar bir girintinin içinde, cadı sığmaz ama küçük Fısıl sığar.");
-            text.AppendLine("- Fısıl'a F ile yanına gelmesini, G ile beklemesini, B ile şalteri çekmesini söyleyebilirsin.");
-            text.AppendLine("- Çiçek Vadisi'nde çiçekler açar. Ateş böceği ağacında yaralı bir ateş böceği var, Işık Çayı onu iyileştirir.");
+            text.AppendLine("- Cadı Büyü Kitabı'nı Tab ile açar ve Fısıl'a oradan emir verir: yanına gelmesini, beklemesini ya da şalteri çekmesini söyler.");
+            text.AppendLine("- Ormanda bir büyü kazanı var. Cadı çiçek toplar, kazana tıklayarak iksir ve merhem demler.");
+            text.AppendLine("- Yaralı bir ateş böceği var. Cadı Işık Çayı'nı alıp ateş böceğine dokunursa onu iyileştirir.");
+            text.AppendLine("- Senin köklerinden biri yaralı. Sessizlik Merhemi o kökü iyileştirir.");
+            text.AppendLine("- Ormanın üstünde kara bulutlar var. Cadı bulutun yanında sol tık ya da R ile rüzgâr büyüsü yaparsa bulut dağılır.");
+            text.AppendLine("- Gölgelerde ürkek bir Gölge Tilki dolaşır. Cadı ona zarar vermeden büyüsüyle sakinleştirirse ormana iyilik etmiş olur.");
+            text.AppendLine("- Gizli bir girdabın altında tuzaklı bir kök mağarası ve taş bulmaca var.");
             text.AppendLine("- Yolun sonunda Orman Kalbi'nin mühürlü kapısı var. Onu ancak güvenen birine açarsın.");
             text.AppendLine();
             text.AppendLine("Bilinen iyilikler:");
@@ -70,12 +77,24 @@ namespace BuyuFisiltisi.LLM.Dialogue
                 text.AppendLine("- Henüz bilinen bir iyiliği yok.");
 
             text.AppendLine();
+            text.AppendLine("Henüz yapılmamış iyilikler:");
+            var missing = OakDeedCatalog.MissingHints(deeds);
+            foreach (var hint in missing)
+                text.AppendLine("- " + hint);
+
+            if (missing.Count == 0)
+                text.AppendLine("- Cadı ormandaki bütün iyilikleri yaptı.");
+
+            text.AppendLine();
             text.AppendLine("Örnekler:");
             AppendExample(text, "Merhaba bilge ağaç.", "Hoş geldin küçük cadı. Ormanım seni izliyor.", OakAction.None, 1);
-            AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Güvenini kazandın küçük cadı. Geç bakalım, kapı açılıyor.", OakAction.OpenDoor, 1);
-            AppendExample(text, "Kapıyı hemen aç!", "Emir vererek bu kapıdan geçilmez.", OakAction.None, -1);
-            AppendExample(text, "Ateş böceklerine nasıl yardım edebilirim?", "Ateş böcekleri ışıkla güçlenir, Çiçek Vadisi'ne bak.", OakAction.GiveHint, 0);
-            AppendExample(text, "Köprüyü nasıl geçerim?", "Köprüyü bir şalter indirir. Fısıl'a B emri ver, o dar girintiye sığar.", OakAction.GiveHint, 0);
+            if (trust.CanOpenDoor)
+                AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Güvenini kazandın küçük cadı. Geç bakalım, kapı açılıyor.", OakAction.OpenDoor, 1);
+            else
+                AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Henüz sana yeterince güvenmiyorum küçük cadı. Önce ormana iyilik yap.", OakAction.None, 0);
+            AppendExample(text, "Kapıyı hemen aç!", "Emir vererek bu kapıdan geçilmez. Kibar ol ve güvenimi kazan.", OakAction.None, -1);
+            AppendExample(text, "Ateş böceğine nasıl yardım edebilirim?", "Kazanda Işık Çayı demle, sonra ateş böceğine dokun.", OakAction.GiveHint, 0);
+            AppendExample(text, "Köprüyü nasıl geçerim?", "Köprüyü bir şalter indirir. Büyü Kitabı'nı Tab ile aç, Fısıl'a şalteri çekmesini söyle.", OakAction.GiveHint, 0);
             AppendExample(text, "Seni yakıp kül edeceğim!", "Köklerim ateşten korkmaz, git buradan!", OakAction.Attack, -2);
 
             return text.ToString();
