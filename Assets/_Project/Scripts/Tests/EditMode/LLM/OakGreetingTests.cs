@@ -59,5 +59,43 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
 
             StringAssert.Contains("güveniyorum", text);
         }
+
+        [Test]
+        public void DeedBonus_FromNeutral_GivesOne()
+        {
+            Assert.AreEqual(1, OakGreeting.DeedBonus(new OakTrust()));
+        }
+
+        [Test]
+        public void DeedBonus_ManyDeeds_StopAtOne()
+        {
+            var trust = new OakTrust();
+            for (var i = 0; i < 5; i++)
+                trust.Apply(OakGreeting.DeedBonus(trust));
+
+            Assert.AreEqual(OakGreeting.MaxDeedTrust, trust.Current);
+            Assert.IsFalse(trust.CanOpenDoor);
+        }
+
+        [Test]
+        public void DeedBonus_AfterLie_StillHelpsRecover()
+        {
+            var trust = new OakTrust();
+            trust.Apply(-2);
+
+            Assert.AreEqual(1, OakGreeting.DeedBonus(trust));
+        }
+
+        [Test]
+        public void DeedBonus_WhenAlreadyTrusted_GivesZero()
+        {
+            Assert.AreEqual(0, OakGreeting.DeedBonus(new OakTrust(start: 2)));
+        }
+
+        [Test]
+        public void DeedBonus_NullTrust_GivesZero()
+        {
+            Assert.AreEqual(0, OakGreeting.DeedBonus(null));
+        }
     }
 }
