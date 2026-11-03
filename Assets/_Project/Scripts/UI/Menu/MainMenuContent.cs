@@ -18,6 +18,7 @@ namespace BuyuFisiltisi.UI.Menu
     public static class MainMenuContent
     {
         public const string GameSceneName = "ForestScene";
+        public const string MenuSceneName = "MainMenu";
         public const string Title = "Büyü Fısıltısı";
         public const string Subtitle = "Sessiz ormanı sözlerinle ve iyiliklerinle uyandır.";
         public const string PlayLabel = "Oyna";
@@ -46,7 +47,7 @@ namespace BuyuFisiltisi.UI.Menu
             new ControlHint("E", "Yaşlı Meşe ile konuş"),
             new ControlHint("Tab", "Fısıl'ın sayfalarını aç"),
             new ControlHint("F / G", "Fısıl: yanıma gel / bekle"),
-            new ControlHint("Esc", "Pencereyi kapat")
+            new ControlHint("Esc / P", "Oyunu duraklat ya da pencereyi kapat")
         };
 
         public static float UiScale(float screenHeight)

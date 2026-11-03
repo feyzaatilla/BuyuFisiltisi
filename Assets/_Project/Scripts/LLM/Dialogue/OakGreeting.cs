@@ -7,6 +7,15 @@ namespace BuyuFisiltisi.LLM.Dialogue
     {
         public const int DeedTrustBonus = 1;
         public const int MaxListedDeeds = 3;
+        public const int MaxDeedTrust = 1;
+
+        public static int DeedBonus(OakTrust trust)
+        {
+            if (trust == null)
+                return 0;
+
+            return trust.Current + DeedTrustBonus <= MaxDeedTrust ? DeedTrustBonus : 0;
+        }
 
         public static string Build(IReadOnlyList<string> deeds, OakTrust trust)
         {
