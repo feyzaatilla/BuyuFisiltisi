@@ -17,8 +17,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_player == null || _log == null || _parkour == null)
                 return;
 
-            var feet = _player.position + Vector3.up * 0.9f;
-            if (Vector3.Distance(feet, _log.position) <= _hitRadius)
+            if (Vector3.Distance(_player.position, _log.position) <= _hitRadius)
                 _parkour.Fail("Sallanan kütük sana çarptı! Zamanlamanı ayarla.");
         }
     }
