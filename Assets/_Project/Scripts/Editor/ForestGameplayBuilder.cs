@@ -172,6 +172,10 @@ namespace BuyuFisiltisi.EditorTools
             CreateCauldron(root, book, body != null ? body : witch.transform, inventory);
             CreateTraps(root, body != null ? body : witch.transform);
             CreateShadowFox(root, body != null ? body : witch.transform, inventory);
+            var music = new GameObject("OrmanMuzigi");
+            music.transform.SetParent(root, false);
+            music.AddComponent<AudioSource>();
+            music.AddComponent<ForestMusic>();
 
             var touch = new GameObject("SalterDokunusu").AddComponent<BuyuFisiltisi.Gameplay.Commands.SwitchTouchCommand>();
             touch.transform.SetParent(root, false);
