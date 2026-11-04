@@ -44,6 +44,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 if (_checkpoints[i] != null && Near(_checkpoints[i].position, 2f))
                 {
                     _current = i;
+                    GameSound.Play(SoundKind.Checkpoint);
                     Show("Kök ışığı parladı. Düşersen buradan devam edeceksin.");
                 }
             }
@@ -51,6 +52,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_player.position.y < transform.position.y - _fallDepth)
             {
                 Teleport(_checkpoints[_current]);
+                GameSound.Play(SoundKind.Fail);
                 Show("Köklerin arasına düştün! Bir daha dene.");
                 return;
             }
@@ -88,6 +90,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 return;
 
             Teleport(_checkpoints[_current]);
+            GameSound.Play(SoundKind.Fail);
             Show(message);
         }
 

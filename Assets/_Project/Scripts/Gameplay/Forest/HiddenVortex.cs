@@ -51,6 +51,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
                 _pullUntil = Time.time + _pullSeconds;
                 Debug.Log("[Girdap] Cadı girdaba girdi: " + _player.position);
+                GameSound.Play(SoundKind.Vortex, 0.8f);
                 if (_hint != null)
                     _hint.gameObject.SetActive(false);
                 if (_swirl != null)

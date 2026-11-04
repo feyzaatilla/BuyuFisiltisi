@@ -176,6 +176,7 @@ namespace BuyuFisiltisi.EditorTools
             music.transform.SetParent(root, false);
             music.AddComponent<AudioSource>();
             music.AddComponent<ForestMusic>();
+            music.AddComponent<GameSoundListener>();
 
             var touch = new GameObject("SalterDokunusu").AddComponent<BuyuFisiltisi.Gameplay.Commands.SwitchTouchCommand>();
             touch.transform.SetParent(root, false);

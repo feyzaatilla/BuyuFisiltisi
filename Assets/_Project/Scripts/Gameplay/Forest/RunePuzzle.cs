@@ -69,12 +69,14 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 if (_progress >= _order.Length)
                 {
                     IsSolved = true;
+                    GameSound.Play(SoundKind.Solved, 0.8f);
                     if (_exit != null)
                         _exit.SetActive(true);
                     GameMessage.Show("Taşların hepsi parladı! Çıkış kapısı açıldı.", new Color(0.65f, 1f, 0.75f), 4f);
                 }
                 else
                 {
+                    GameSound.Play(SoundKind.StoneLit);
                     GameMessage.Show(NameOf(touched) + " parladı.", new Color(0.8f, 0.9f, 1f), 2f);
                 }
                 return;
@@ -82,6 +84,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
             _progress = 0;
             SetLights(0);
+            GameSound.Play(SoundKind.StoneWrong);
             GameMessage.Show(NameOf(touched) + " söndü, taşlar sıfırlandı. " + _hint, new Color(1f, 0.6f, 0.55f), 8f);
         }
 
