@@ -35,6 +35,12 @@ namespace BuyuFisiltisi.Gameplay.Forest
             source.volume = _volume;
             source.playOnAwake = false;
             source.Play();
+
+            if (GetComponent<ForestAmbience>() == null)
+                gameObject.AddComponent<ForestAmbience>();
+            var witch = Object.FindFirstObjectByType<BuyuFisiltisi.Gameplay.Player.WitchMotor>();
+            if (witch != null && witch.GetComponent<Footsteps>() == null)
+                witch.gameObject.AddComponent<Footsteps>();
         }
 
         private AudioClip CreateClip()
