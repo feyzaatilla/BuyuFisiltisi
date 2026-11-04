@@ -19,6 +19,7 @@ namespace BuyuFisiltisi.UI.Menu
         private GUIStyle _keyStyle;
         private GUIStyle _statusStyle;
         private GUIStyle _buttonStyle;
+        private GUIStyle _shadowStyle;
         private Texture2D _shade;
         private float _width;
         private float _height;
@@ -67,7 +68,7 @@ namespace BuyuFisiltisi.UI.Menu
             _width = Screen.width / scale;
             _height = Screen.height / scale;
             GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
-            GUI.DrawTexture(new Rect(0f, 0f, _width, _height), _shade);
+            Shade(new Rect(0f, 0f, _width, _height), _state.Page == MainMenuPage.HowTo ? 0.82f : 0.18f);
 
             var width = Mathf.Min(760f, _width - 40f);
             var x = (_width - width) / 2f;
@@ -83,6 +84,8 @@ namespace BuyuFisiltisi.UI.Menu
         private void DrawMain(float x, float width)
         {
             var y = _height * 0.2f;
+            Shade(new Rect(x + width * 0.15f, y - 20f, width * 0.7f, 380f), 0.45f);
+            GUI.Label(new Rect(x + 3f, y + 3f, width, 70f), MainMenuContent.Title, _shadowStyle);
             GUI.Label(new Rect(x, y, width, 70f), MainMenuContent.Title, _titleStyle);
             y += 80f;
             GUI.Label(new Rect(x, y, width, 34f), MainMenuContent.Subtitle, _subtitleStyle);
@@ -147,6 +150,14 @@ namespace BuyuFisiltisi.UI.Menu
                 GUI.Label(new Rect(20f, y - 34f, _width - 40f, 30f), note, _textStyle);
         }
 
+        private void Shade(Rect rect, float alpha)
+        {
+            var previous = GUI.color;
+            GUI.color = new Color(1f, 1f, 1f, alpha);
+            GUI.DrawTexture(rect, _shade);
+            GUI.color = previous;
+        }
+
         private static Color ToneColor(ConnectionTone tone)
         {
             switch (tone)
@@ -167,6 +178,8 @@ namespace BuyuFisiltisi.UI.Menu
 
             _titleStyle = new GUIStyle(GUI.skin.label) { fontSize = 52, fontStyle = FontStyle.Bold, alignment = TextAnchor.MiddleCenter };
             _titleStyle.normal.textColor = new Color(0.75f, 0.95f, 0.7f);
+            _shadowStyle = new GUIStyle(_titleStyle);
+            _shadowStyle.normal.textColor = new Color(0f, 0f, 0f, 0.8f);
             _subtitleStyle = new GUIStyle(GUI.skin.label) { fontSize = 22, fontStyle = FontStyle.Italic, alignment = TextAnchor.MiddleCenter, wordWrap = true };
             _subtitleStyle.normal.textColor = new Color(0.9f, 0.9f, 0.8f);
             _textStyle = new GUIStyle(GUI.skin.label) { fontSize = 20, wordWrap = true };
@@ -176,7 +189,7 @@ namespace BuyuFisiltisi.UI.Menu
             _statusStyle = new GUIStyle(GUI.skin.label) { fontSize = 20, fontStyle = FontStyle.Bold };
             _buttonStyle = new GUIStyle(GUI.skin.button) { fontSize = 24 };
             _shade = new Texture2D(1, 1);
-            _shade.SetPixel(0, 0, new Color(0.04f, 0.08f, 0.06f, 0.92f));
+            _shade.SetPixel(0, 0, new Color(0.02f, 0.06f, 0.05f, 1f));
             _shade.Apply();
         }
     }

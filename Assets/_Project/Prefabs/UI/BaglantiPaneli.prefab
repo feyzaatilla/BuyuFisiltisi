@@ -528,7 +528,7 @@ MonoBehaviour:
   _settings:
     baseUrl: http://localhost:11434
     model: gemma2:2b
-    timeoutSeconds: 10
+    timeoutSeconds: 90
     temperature: 0.7
   _checkOnStart: 1
 --- !u!114 &1350479664111365132
