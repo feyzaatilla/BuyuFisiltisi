@@ -53,6 +53,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             {
                 Teleport(_checkpoints[_current]);
                 GameSound.Play(SoundKind.Fail);
+                ScreenFlash.Play();
                 Show("Köklerin arasına düştün! Bir daha dene.");
                 return;
             }
@@ -91,6 +92,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
             Teleport(_checkpoints[_current]);
             GameSound.Play(SoundKind.Fail);
+            ScreenFlash.Play();
             Show(message);
         }
 

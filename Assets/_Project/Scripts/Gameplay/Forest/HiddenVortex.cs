@@ -86,6 +86,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             var respawnable = _player.GetComponentInParent<IRespawnable>();
             if (respawnable != null && _destination != null)
                 respawnable.Respawn(_destination.position, _destination.rotation);
+            ScreenFlash.Play(2f);
             Debug.Log("[Girdap] Cadı parkura taşındı: " + (_destination != null ? _destination.position.ToString() : "hedef yok"));
             GameMessage.Show("Köklerin altındaki karanlık bir mağaraya düştün. Tuzaklara dikkat et ve çıkışı bul!", new Color(0.65f, 1f, 0.75f), 4f);
         }
