@@ -21,6 +21,7 @@ namespace BuyuFisiltisi.Gameplay.Player
         public Vector3 Velocity { get; private set; }
 
         public float SpeedMultiplier { get; set; } = 1f;
+        public float JumpMultiplier { get; set; } = 1f;
         public bool IsGrounded => _controller != null && _controller.isGrounded;
 
         private void Awake()
@@ -57,7 +58,7 @@ namespace BuyuFisiltisi.Gameplay.Player
 
             _verticalSpeed = MovementMath.NextVerticalSpeed(_verticalSpeed, grounded, _gravity, Time.deltaTime, _groundStick);
             if (grounded && _input.JumpPressed)
-                _verticalSpeed = MovementMath.JumpSpeed(_jumpHeight, _gravity);
+                _verticalSpeed = MovementMath.JumpSpeed(_jumpHeight * JumpMultiplier, _gravity);
             var horizontal = direction * (speed * SpeedMultiplier);
             Velocity = new Vector3(horizontal.x, _verticalSpeed, horizontal.z);
             _controller.Move(Velocity * Time.deltaTime);

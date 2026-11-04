@@ -172,6 +172,11 @@ namespace BuyuFisiltisi.EditorTools
             CreateCauldron(root, book, body != null ? body : witch.transform, inventory);
             CreateTraps(root, body != null ? body : witch.transform);
             CreateShadowFox(root, body != null ? body : witch.transform, inventory);
+            var music = new GameObject("OrmanMuzigi");
+            music.transform.SetParent(root, false);
+            music.AddComponent<AudioSource>();
+            music.AddComponent<ForestMusic>();
+            music.AddComponent<GameSoundListener>();
 
             var touch = new GameObject("SalterDokunusu").AddComponent<BuyuFisiltisi.Gameplay.Commands.SwitchTouchCommand>();
             touch.transform.SetParent(root, false);
@@ -1330,31 +1335,115 @@ namespace BuyuFisiltisi.EditorTools
             cauldron.SetParent(root, false);
             cauldron.position = CauldronPosition;
 
-            PlaceModel(cauldron, "campfire_stones", CauldronPosition, 0f, 1.6f);
-            PlaceModel(cauldron, "campfire_logs", CauldronPosition, 30f, 1.1f);
-            PlaceModel(cauldron, "pot_large", CauldronPosition + Vector3.up * 0.25f, 0f, 1.1f);
+            PlaceModel(cauldron, "campfire_stones", CauldronPosition, 0f, 3.6f);
+            PlaceModel(cauldron, "campfire_logs", CauldronPosition, 30f, 2.6f);
+            var pot = PlaceModel(cauldron, "pot_large", CauldronPosition + Vector3.up * 0.45f, 0f, 2.8f);
+            var potTop = CauldronPosition.y + 2f;
+            var potWidth = 2.2f;
+            if (pot != null)
+            {
+                var renderers = pot.GetComponentsInChildren<Renderer>();
+                if (renderers.Length > 0)
+                {
+                    var bounds = renderers[0].bounds;
+                    foreach (var renderer in renderers)
+                        bounds.Encapsulate(renderer.bounds);
+                    potTop = bounds.max.y;
+                    potWidth = Mathf.Min(bounds.size.x, bounds.size.z);
+                }
+            }
+            var surfaceHeight = potTop - 0.12f - CauldronPosition.y;
 
+            var glowMaterial = GetColorMaterial("6CFF8A_Isik", new Color(0.42f, 1f, 0.54f), true);
             var brew = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             brew.name = "Iksir";
             brew.transform.SetParent(cauldron, false);
-            brew.transform.position = CauldronPosition + Vector3.up * 1.05f;
-            brew.transform.localScale = new Vector3(0.8f, 0.02f, 0.8f);
+            brew.transform.position = CauldronPosition + Vector3.up * surfaceHeight;
+            brew.transform.localScale = new Vector3(potWidth * 0.78f, 0.02f, potWidth * 0.78f);
             Object.DestroyImmediate(brew.GetComponent<Collider>());
-            brew.GetComponent<Renderer>().sharedMaterial = GetColorMaterial("6CFF8A_Isik", new Color(0.42f, 1f, 0.54f), true);
+            brew.GetComponent<Renderer>().sharedMaterial = glowMaterial;
 
             var glow = new GameObject("KazanIsigi");
             glow.transform.SetParent(cauldron, false);
-            glow.transform.position = CauldronPosition + Vector3.up * 1.6f;
+            glow.transform.position = CauldronPosition + Vector3.up * (surfaceHeight + 0.8f);
             var light = glow.AddComponent<Light>();
             light.type = LightType.Point;
             light.color = new Color(0.45f, 1f, 0.5f);
-            light.intensity = 6f;
-            light.range = 5f;
-            glow.AddComponent<FlickerLight>();
+            light.intensity = 7f;
+            light.range = 9f;
+
+            var magicRoot = new GameObject("BuyuEfekti").transform;
+            magicRoot.SetParent(cauldron, false);
+            var moteMaterial = GetColorMaterial("C9A0FF_Buyu", new Color(0.79f, 0.63f, 1f), true);
+            var motes = new Transform[18];
+            for (var i = 0; i < motes.Length; i++)
+            {
+                var mote = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                mote.name = "Buyu_Zerresi";
+                mote.transform.SetParent(magicRoot, false);
+                Object.DestroyImmediate(mote.GetComponent<Collider>());
+                mote.GetComponent<Renderer>().sharedMaterial = i % 3 == 0 ? glowMaterial : moteMaterial;
+                mote.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                motes[i] = mote.transform;
+            }
+            var bubbles = new Transform[5];
+            for (var i = 0; i < bubbles.Length; i++)
+            {
+                var bubble = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                bubble.name = "Kabarcik";
+                bubble.transform.SetParent(magicRoot, false);
+                var angle = i * 72f * Mathf.Deg2Rad;
+                bubble.transform.localPosition = new Vector3(Mathf.Cos(angle) * potWidth * 0.15f * (i % 2 + 1), surfaceHeight, Mathf.Sin(angle) * potWidth * 0.15f * (i % 2 + 1));
+                Object.DestroyImmediate(bubble.GetComponent<Collider>());
+                bubble.GetComponent<Renderer>().sharedMaterial = glowMaterial;
+                bubbles[i] = bubble.transform;
+            }
+
+            var wispMaterial = GetColorMaterial("4DFF7A_Buyu", new Color(0.3f, 1f, 0.48f), true);
+            var wisps = new Transform[12];
+            for (var i = 0; i < wisps.Length; i++)
+            {
+                var wisp = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                wisp.name = "Yesil_Buyu";
+                wisp.transform.SetParent(magicRoot, false);
+                Object.DestroyImmediate(wisp.GetComponent<Collider>());
+                wisp.GetComponent<Renderer>().sharedMaterial = wispMaterial;
+                wisp.GetComponent<Renderer>().shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                if (i % 4 == 0)
+                {
+                    var wispLight = wisp.AddComponent<Light>();
+                    wispLight.type = LightType.Point;
+                    wispLight.color = new Color(0.3f, 1f, 0.48f);
+                    wispLight.intensity = 2f;
+                    wispLight.range = 3f;
+                }
+                wisps[i] = wisp.transform;
+            }
+
+            var magic = cauldron.gameObject.AddComponent<CauldronMagic>();
+            var magicData = new SerializedObject(magic);
+            var moteList = magicData.FindProperty("_motes");
+            moteList.arraySize = motes.Length;
+            for (var i = 0; i < motes.Length; i++)
+                moteList.GetArrayElementAtIndex(i).objectReferenceValue = motes[i];
+            var bubbleList = magicData.FindProperty("_bubbles");
+            bubbleList.arraySize = bubbles.Length;
+            for (var i = 0; i < bubbles.Length; i++)
+                bubbleList.GetArrayElementAtIndex(i).objectReferenceValue = bubbles[i];
+            var wispList = magicData.FindProperty("_wisps");
+            wispList.arraySize = wisps.Length;
+            for (var i = 0; i < wisps.Length; i++)
+                wispList.GetArrayElementAtIndex(i).objectReferenceValue = wisps[i];
+            magicData.FindProperty("_orbitRadius").floatValue = potWidth * 0.5f + 1.3f;
+            magicData.FindProperty("_radius").floatValue = potWidth * 0.4f;
+            magicData.FindProperty("_surfaceHeight").floatValue = surfaceHeight;
+            magicData.FindProperty("_surface").objectReferenceValue = brew.GetComponent<Renderer>();
+            magicData.FindProperty("_light").objectReferenceValue = light;
+            magicData.ApplyModifiedPropertiesWithoutUndo();
 
             var clickArea = cauldron.gameObject.AddComponent<BoxCollider>();
-            clickArea.center = new Vector3(0f, 0.8f, 0f);
-            clickArea.size = new Vector3(1.8f, 1.6f, 1.8f);
+            clickArea.center = new Vector3(0f, surfaceHeight * 0.5f, 0f);
+            clickArea.size = new Vector3(potWidth + 0.8f, surfaceHeight + 0.4f, potWidth + 0.8f);
 
             var station = cauldron.gameObject.AddComponent<BuyuFisiltisi.Gameplay.Book.CauldronStation>();
             var data = new SerializedObject(station);
