@@ -63,14 +63,14 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
-        public void TrueClaim_KeepsModelAnswer()
+        public void TrueClaim_IsBelievedButTrustStays()
         {
             var session = Session("none", 2, new OakTrust(start: 1));
             session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
 
             var turn = session.TalkAsync("Ateş böceğini iyileştirdim.").GetAwaiter().GetResult();
 
-            Assert.AreEqual(2, turn.CurrentTrust);
+            Assert.AreEqual(1, turn.CurrentTrust);
             Assert.AreEqual(OakClaimVerdict.Honest, session.LastVerdict);
         }
 
@@ -118,6 +118,87 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
             Assert.AreEqual(-4, turn.CurrentTrust);
             Assert.AreNotSame(NoAction.Instance, turn.Action);
             Assert.AreEqual(OakToneGuard.AttackReply, turn.Reply);
+        }
+    
+        [Test]
+        public void UnrelatedQuestion_DoesNotChangeTrust()
+        {
+            var session = Session("none", 1, new OakTrust(start: 1));
+
+            var turn = session.TalkAsync("Kaç yaşındasın?").GetAwaiter().GetResult();
+
+            Assert.AreEqual(1, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void Praise_WithoutDeeds_StopsBelowDoor()
+        {
+            var session = Session("none", 0, new OakTrust(start: 0));
+
+            session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
+            session.TalkAsync("Sen çok bilgesin.").GetAwaiter().GetResult();
+            var turn = session.TalkAsync("Teşekkür ederim.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(2, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void Praise_WithDeed_ReachesDoor()
+        {
+            var session = Session("none", 0, new OakTrust(start: 1));
+            session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
+
+            session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
+            session.TalkAsync("Sen çok bilgesin.").GetAwaiter().GetResult();
+            var turn = session.TalkAsync("Teşekkür ederim.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(3, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void Praise_AfterLosingTrust_CanRecover()
+        {
+            var session = Session("none", 0, new OakTrust(start: 0));
+
+            session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
+            session.TalkAsync("Aç kapıyı").GetAwaiter().GetResult();
+            session.TalkAsync("Aç kapıyı").GetAwaiter().GetResult();
+            var turn = session.TalkAsync("Özür dilerim, sen çok bilgesin.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(0, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void Command_DropsTrustByOne()
+        {
+            var session = Session("none", 1, new OakTrust(start: 2));
+
+            var turn = session.TalkAsync("Aç kapıyı").GetAwaiter().GetResult();
+
+            Assert.AreEqual(1, turn.CurrentTrust);
+            Assert.AreEqual(OakToneGuard.CommandReply, turn.Reply);
+        }
+
+        [Test]
+        public void TaskQuestion_RemindsFirstMissingDeed()
+        {
+            var session = Session("none", 1, new OakTrust(start: 1));
+
+            var turn = session.TalkAsync("Ne yapmalıyım?").GetAwaiter().GetResult();
+
+            Assert.AreEqual(OakDeedCatalog.MissingHints(session.Deeds)[0], turn.Reply);
+            Assert.AreEqual(1, turn.CurrentTrust);
+        }
+    
+        [Test]
+        public void Praise_AtCeilingWithoutDeeds_AsksForGoodDeed()
+        {
+            var session = Session("none", 0, new OakTrust(start: 2));
+
+            var turn = session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(2, turn.CurrentTrust);
+            Assert.AreEqual(OakToneGuard.PraiseCeilingReply, turn.Reply);
         }
     }
 }
