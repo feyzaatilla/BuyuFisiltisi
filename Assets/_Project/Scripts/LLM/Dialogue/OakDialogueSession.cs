@@ -27,6 +27,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
         public int HistoryCount => conversation.Count;
         public OakClaimVerdict LastVerdict { get; private set; } = OakClaimVerdict.Honest;
         public OakTone LastTone { get; private set; } = OakTone.Neutral;
+        public int PraiseCeiling => OakToneGuard.PraiseCeiling(Trust, deeds.Count > 0);
 
         public bool AddDeed(string description)
         {
@@ -56,9 +57,19 @@ namespace BuyuFisiltisi.LLM.Dialogue
                 return new OakTurn(result.Status, result.Response.Reply, NoAction.Instance, before, before);
 
             var verdict = OakClaimGuard.Judge(text, deeds);
-            var checkedResponse = OakClaimGuard.Apply(result.Response, verdict);
+            var checkedResponse = OakClaimGuard.Apply(OakReplyTrim.Apply(result.Response), verdict);
             var tone = verdict == OakClaimVerdict.Honest ? OakToneGuard.Judge(text) : OakTone.Neutral;
-            checkedResponse = OakToneGuard.Apply(checkedResponse, tone);
+            if (verdict == OakClaimVerdict.Honest)
+                checkedResponse = OakToneGuard.Apply(checkedResponse, tone);
+            if (tone == OakTone.Kind && Trust.Current >= PraiseCeiling)
+                checkedResponse = new OakResponse(deeds.Count == 0 ? OakToneGuard.PraiseCeilingReply : checkedResponse.Reply, checkedResponse.Action, 0);
+
+            var calm = verdict == OakClaimVerdict.Honest && !OakToneGuard.IsAngry(tone);
+            if (calm && OakDoorHint.IsDoorRequest(text))
+                checkedResponse = OakDoorHint.Request(checkedResponse, Trust.Current + checkedResponse.TrustDelta >= Trust.DoorThreshold);
+            else if (calm && OakQuestionGuide.TryAnswer(text, deeds, Trust.CanOpenDoor, out var guide))
+                checkedResponse = OakQuestionGuide.Apply(checkedResponse, guide);
+
             checkedResponse = OakToneGuard.Escalate(checkedResponse, tone, Trust.Current, Trust.AttackThreshold, Trust.Min);
             var gated = OakResponseGate.ApplyTurn(checkedResponse, Trust);
             conversation.Record(text, gated);

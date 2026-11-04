@@ -940,6 +940,8 @@ namespace BuyuFisiltisi.EditorTools
             for (var i = 0; i < fur.Count; i++)
                 furList.GetArrayElementAtIndex(i).objectReferenceValue = fur[i];
             data.ApplyModifiedPropertiesWithoutUndo();
+
+            FoxModelInstaller.Install(fox.gameObject);
         }
 
         private static void CreateTraps(Transform root, Transform player)

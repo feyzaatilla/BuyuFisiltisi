@@ -6,23 +6,40 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
     public class OakToneGuardTests
     {
         [TestCase("Merhaba Yaşlı Meşe, nasılsın?")]
-        [TestCase("Ormanın çok güzel.")]
-        [TestCase("Kapıyı açar mısın lütfen?")]
         [TestCase("Bunu hemen açıklar mısın?")]
+        [TestCase("Hava nasıl?")]
+        [TestCase("Teşekkür ederim")]
         [TestCase("")]
-        public void Polite_IsNeutral(string text)
+        public void Ordinary_IsNeutral(string text)
         {
             Assert.AreEqual(OakTone.Neutral, OakToneGuard.Judge(text));
         }
 
+        [TestCase("Ormanın çok güzel.")]
+        [TestCase("Kapıyı açar mısın lütfen?")]
+        [TestCase("Sen çok bilgesin")]
+        [TestCase("Lütfen kapıyı aç")]
+        public void Praise_IsKind(string text)
+        {
+            Assert.AreEqual(OakTone.Kind, OakToneGuard.Judge(text));
+        }
+
         [TestCase("Ormanını beğenmedim")]
         [TestCase("Sen aptal bir ağaçsın")]
-        [TestCase("Kapıyı hemen aç!")]
         [TestCase("SUS ARTIK")]
         [TestCase("Defol git")]
         public void Rude_IsDetected(string text)
         {
             Assert.AreEqual(OakTone.Rude, OakToneGuard.Judge(text));
+        }
+
+        [TestCase("Kapıyı hemen aç!")]
+        [TestCase("Aç kapıyı")]
+        [TestCase("Hemen kapıyı aç")]
+        [TestCase("Emrediyorum, itaat et")]
+        public void Command_IsDetected(string text)
+        {
+            Assert.AreEqual(OakTone.Command, OakToneGuard.Judge(text));
         }
 
         [TestCase("Seni yakıp kül edeceğim!")]
@@ -60,20 +77,47 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
-        public void Apply_Neutral_CapsRiseAtOne()
+        public void Apply_Neutral_KeepsTrustSame()
         {
             var result = OakToneGuard.Apply(new OakResponse("Çok naziksin.", OakAction.None, 2), OakTone.Neutral);
 
-            Assert.AreEqual(OakToneGuard.MaxRise, result.TrustDelta);
+            Assert.AreEqual(0, result.TrustDelta);
             Assert.AreEqual("Çok naziksin.", result.Reply);
         }
 
         [Test]
-        public void Apply_Neutral_KeepsNegativeDelta()
+        public void Apply_Neutral_IgnoresModelDrop()
         {
             var result = OakToneGuard.Apply(new OakResponse("Hmm.", OakAction.None, -1), OakTone.Neutral);
 
-            Assert.AreEqual(-1, result.TrustDelta);
+            Assert.AreEqual(0, result.TrustDelta);
+        }
+
+        [Test]
+        public void Apply_Kind_RaisesByOne()
+        {
+            var result = OakToneGuard.Apply(new OakResponse("Teşekkürler küçük cadı.", OakAction.None, 0), OakTone.Kind);
+
+            Assert.AreEqual(OakToneGuard.KindDelta, result.TrustDelta);
+            Assert.AreEqual("Teşekkürler küçük cadı.", result.Reply);
+        }
+
+        [Test]
+        public void Apply_Command_DropsByOneWithWarning()
+        {
+            var result = OakToneGuard.Apply(new OakResponse("Peki.", OakAction.OpenDoor, 1), OakTone.Command);
+
+            Assert.AreEqual(OakToneGuard.CommandDelta, result.TrustDelta);
+            Assert.AreEqual(OakAction.None, result.Action);
+            Assert.AreEqual(OakToneGuard.CommandReply, result.Reply);
+        }
+
+        [Test]
+        public void Escalate_KindNeverAttacks()
+        {
+            var result = OakToneGuard.Escalate(new OakResponse("Özür dilerim.", OakAction.None, 1), OakTone.Kind, -3, -3, -5);
+
+            Assert.AreEqual(OakAction.None, result.Action);
         }
 
         [Test]

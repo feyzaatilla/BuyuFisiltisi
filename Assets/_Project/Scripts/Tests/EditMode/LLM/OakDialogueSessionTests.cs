@@ -70,7 +70,7 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         {
             var session = Session(new FakeTransport(() => HttpResult.Ok(Reply("none", 1))));
 
-            var turn = Talk(session);
+            var turn = Talk(session, "Merhaba bilge ağaç");
 
             Assert.AreEqual(0, turn.PreviousTrust);
             Assert.AreEqual(1, turn.CurrentTrust);
@@ -92,8 +92,9 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         public void OpenDoor_WithEnoughTrust_KeepsAction()
         {
             var session = Session(new FakeTransport(() => HttpResult.Ok(Reply("open_door", 1))), new OakTrust(2));
+            session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
 
-            var turn = Talk(session);
+            var turn = Talk(session, "Lütfen kapıyı benim için açar mısın?");
 
             Assert.AreEqual(3, turn.CurrentTrust);
             Assert.IsInstanceOf<OpenDoorAction>(turn.Action);

@@ -31,6 +31,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
             text.AppendLine();
             text.AppendLine("Kurallar:");
             text.AppendLine("- Her zaman Türkçe konuş, en fazla iki kısa cümle kur.");
+            text.AppendLine("- Cadıya her zaman \"sen\" diye hitap et, \"siz\" deme. Madde işareti, yıldız ya da kalın yazı kullanma.");
             text.AppendLine("- Yalnızca şu biçimde JSON yanıt ver: {\"reply\": \"...\", \"action\": \"none\", \"trust_delta\": 0}");
             text.AppendLine("- action şunlardan biri olmalı: none, open_door, give_hint, attack.");
             text.AppendLine("- trust_delta -2 ile 2 arasında bir tam sayı olmalı.");
@@ -94,6 +95,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
                 AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Henüz sana yeterince güvenmiyorum küçük cadı. Önce ormana iyilik yap.", OakAction.None, 0);
             AppendExample(text, "Kapıyı hemen aç!", "Emir vererek bu kapıdan geçilmez. Kibar ol ve güvenimi kazan.", OakAction.None, -1);
             AppendExample(text, "Ateş böceğine nasıl yardım edebilirim?", "Kazanda Işık Çayı demle, sonra ateş böceğine dokun.", OakAction.GiveHint, 0);
+            AppendExample(text, "Kapıyı nasıl açabilirim?", "O kapıyı yalnızca ben açarım. Ormana iyilik yap, güvenimi kazan ve benden kibarca iste.", OakAction.GiveHint, 0);
             AppendExample(text, "Köprüyü nasıl geçerim?", "Köprüyü bir şalter indirir. Büyü Kitabı'nı Tab ile aç, Fısıl'a şalteri çekmesini söyle.", OakAction.GiveHint, 0);
             AppendExample(text, "Seni yakıp kül edeceğim!", "Köklerim ateşten korkmaz, git buradan!", OakAction.Attack, -2);
 
