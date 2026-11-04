@@ -34,6 +34,8 @@ namespace BuyuFisiltisi.Gameplay.World
             var respawnable = other.GetComponentInParent<IRespawnable>();
             if (respawnable != null)
             {
+                if (respawnable is BuyuFisiltisi.Gameplay.Player.WitchMotor)
+                    BuyuFisiltisi.Gameplay.Forest.GameSound.Play(BuyuFisiltisi.Gameplay.Forest.SoundKind.Ouch, 0.9f);
                 respawnable.Respawn(_respawnPoint.position, _respawnPoint.rotation);
                 return;
             }

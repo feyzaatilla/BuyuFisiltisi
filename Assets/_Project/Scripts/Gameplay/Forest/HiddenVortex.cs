@@ -51,6 +51,8 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
                 _pullUntil = Time.time + _pullSeconds;
                 Debug.Log("[Girdap] Cadı girdaba girdi: " + _player.position);
+                GameSound.Play(SoundKind.Vortex, 0.8f);
+                GameSound.Play(SoundKind.Ouch, 0.9f);
                 if (_hint != null)
                     _hint.gameObject.SetActive(false);
                 if (_swirl != null)
@@ -85,6 +87,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
             var respawnable = _player.GetComponentInParent<IRespawnable>();
             if (respawnable != null && _destination != null)
                 respawnable.Respawn(_destination.position, _destination.rotation);
+            ScreenFlash.Play(2f);
             Debug.Log("[Girdap] Cadı parkura taşındı: " + (_destination != null ? _destination.position.ToString() : "hedef yok"));
             GameMessage.Show("Köklerin altındaki karanlık bir mağaraya düştün. Tuzaklara dikkat et ve çıkışı bul!", new Color(0.65f, 1f, 0.75f), 4f);
         }

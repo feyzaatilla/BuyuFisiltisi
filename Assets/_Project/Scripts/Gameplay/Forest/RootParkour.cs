@@ -1,5 +1,6 @@
 using BuyuFisiltisi.Core.Events;
 using BuyuFisiltisi.Core.GameEvents;
+using BuyuFisiltisi.Gameplay.Player;
 using BuyuFisiltisi.Gameplay.World;
 using UnityEngine;
 
@@ -16,10 +17,12 @@ namespace BuyuFisiltisi.Gameplay.Forest
         [SerializeField] private float _fallDepth = 7f;
         [SerializeField] private float _reachRadius = 1.6f;
         [SerializeField] private RunePuzzle _puzzle;
+        [SerializeField] private float _jumpBoost = 1.8f;
 
         private IEventBus _eventBus;
         private int _current;
         private bool _completed;
+        private WitchMotor _motor;
 
         public void InjectEventBus(IEventBus eventBus)
         {
@@ -28,6 +31,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
         private void Update()
         {
+            UpdateJumpBoost();
             if (_player == null || _checkpoints.Length == 0 || _checkpoints[0] == null)
                 return;
 
@@ -40,6 +44,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 if (_checkpoints[i] != null && Near(_checkpoints[i].position, 2f))
                 {
                     _current = i;
+                    GameSound.Play(SoundKind.Checkpoint);
                     Show("Kök ışığı parladı. Düşersen buradan devam edeceksin.");
                 }
             }
@@ -47,6 +52,9 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (_player.position.y < transform.position.y - _fallDepth)
             {
                 Teleport(_checkpoints[_current]);
+                GameSound.Play(SoundKind.Fail);
+                GameSound.Play(SoundKind.Ouch, 0.9f);
+                ScreenFlash.Play();
                 Show("Köklerin arasına düştün! Bir daha dene.");
                 return;
             }
@@ -64,12 +72,29 @@ namespace BuyuFisiltisi.Gameplay.Forest
             }
         }
 
+        private void UpdateJumpBoost()
+        {
+            if (_player == null)
+                return;
+            if (_motor == null)
+                _motor = _player.GetComponentInParent<WitchMotor>();
+            if (_motor == null)
+                return;
+
+            var local = _player.position - transform.position;
+            var inside = Mathf.Abs(local.x) < 30f && Mathf.Abs(local.z) < 60f && local.y < 15f;
+            _motor.JumpMultiplier = inside ? _jumpBoost : 1f;
+        }
+
         public void Fail(string message)
         {
             if (_player == null || _checkpoints.Length == 0)
                 return;
 
             Teleport(_checkpoints[_current]);
+            GameSound.Play(SoundKind.Fail);
+            GameSound.Play(SoundKind.Ouch, 0.9f);
+            ScreenFlash.Play();
             Show(message);
         }
 

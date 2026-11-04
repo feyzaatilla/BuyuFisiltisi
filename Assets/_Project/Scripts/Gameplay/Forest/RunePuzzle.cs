@@ -11,7 +11,7 @@ namespace BuyuFisiltisi.Gameplay.Forest
         [SerializeField] private Light[] _lights = new Light[0];
         [SerializeField] private GameObject _exit;
         [SerializeField] private Transform _hintPoint;
-        [SerializeField] private string _hint = "Duvarda bir yazı var: \"Önce gece uyanır, sonra yıldızlar göz kırpar, en son güneş doğar.\"";
+        [SerializeField] private string _hint = "Duvardaki yazı: \"Önce gece uyanır, sonra yıldızlar göz kırpar, en son güneş doğar.\" Taşların üstüne bu sırayla bas.";
         [SerializeField] private float _touchRadius = 1.3f;
 
         private int _progress;
@@ -32,10 +32,18 @@ namespace BuyuFisiltisi.Gameplay.Forest
             if (IsSolved || _player == null)
                 return;
 
-            if (!_hintShown && _hintPoint != null && Vector3.Distance(_player.position, _hintPoint.position) < 3f)
+            if (_hintPoint != null)
             {
-                _hintShown = true;
-                GameMessage.Show(_hint, new Color(1f, 0.9f, 0.6f), 6f);
+                var hintDistance = Vector3.Distance(_player.position, _hintPoint.position);
+                if (!_hintShown && hintDistance < 3f)
+                {
+                    _hintShown = true;
+                    GameMessage.Show(_hint, new Color(1f, 0.9f, 0.6f), 8f);
+                }
+                else if (_hintShown && hintDistance > 5f)
+                {
+                    _hintShown = false;
+                }
             }
 
             var touched = -1;
@@ -61,12 +69,14 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 if (_progress >= _order.Length)
                 {
                     IsSolved = true;
+                    GameSound.Play(SoundKind.Solved, 0.8f);
                     if (_exit != null)
                         _exit.SetActive(true);
                     GameMessage.Show("Taşların hepsi parladı! Çıkış kapısı açıldı.", new Color(0.65f, 1f, 0.75f), 4f);
                 }
                 else
                 {
+                    GameSound.Play(SoundKind.StoneLit);
                     GameMessage.Show(NameOf(touched) + " parladı.", new Color(0.8f, 0.9f, 1f), 2f);
                 }
                 return;
@@ -74,7 +84,8 @@ namespace BuyuFisiltisi.Gameplay.Forest
 
             _progress = 0;
             SetLights(0);
-            GameMessage.Show(NameOf(touched) + " söndü, taşlar sıfırlandı. Duvardaki yazıyı hatırla.", new Color(1f, 0.6f, 0.55f), 3f);
+            GameSound.Play(SoundKind.StoneWrong);
+            GameMessage.Show(NameOf(touched) + " söndü, taşlar sıfırlandı. " + _hint, new Color(1f, 0.6f, 0.55f), 8f);
         }
 
         private string NameOf(int index)
