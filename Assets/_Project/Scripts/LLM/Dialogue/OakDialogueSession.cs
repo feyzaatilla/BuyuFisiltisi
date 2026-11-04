@@ -26,6 +26,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
         public IReadOnlyList<string> Deeds => deeds;
         public int HistoryCount => conversation.Count;
         public OakClaimVerdict LastVerdict { get; private set; } = OakClaimVerdict.Honest;
+        public OakTone LastTone { get; private set; } = OakTone.Neutral;
 
         public bool AddDeed(string description)
         {
@@ -56,9 +57,13 @@ namespace BuyuFisiltisi.LLM.Dialogue
 
             var verdict = OakClaimGuard.Judge(text, deeds);
             var checkedResponse = OakClaimGuard.Apply(result.Response, verdict);
+            var tone = verdict == OakClaimVerdict.Honest ? OakToneGuard.Judge(text) : OakTone.Neutral;
+            checkedResponse = OakToneGuard.Apply(checkedResponse, tone);
+            checkedResponse = OakToneGuard.Escalate(checkedResponse, tone, Trust.Current, Trust.AttackThreshold, Trust.Min);
             var gated = OakResponseGate.ApplyTurn(checkedResponse, Trust);
             conversation.Record(text, gated);
             LastVerdict = verdict;
+            LastTone = tone;
             return new OakTurn(result.Status, gated.Reply, actions.Create(gated), before, Trust.Current);
         }
     }
