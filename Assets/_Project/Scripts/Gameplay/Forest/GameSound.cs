@@ -15,7 +15,8 @@ namespace BuyuFisiltisi.Gameplay.Forest
         Checkpoint,
         Cloud,
         Bridge,
-        Deed
+        Deed,
+        Ouch
     }
 
     public static class GameSound
@@ -36,6 +37,12 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 _source.spatialBlend = 0f;
             }
 
+            if (kind == SoundKind.Ouch)
+            {
+                _source.PlayOneShot(OuchClip(), volume);
+                return;
+            }
+
             if (!Clips.TryGetValue(kind, out var clip) || clip == null)
             {
                 clip = Create(kind);
@@ -43,6 +50,68 @@ namespace BuyuFisiltisi.Gameplay.Forest
             }
 
             _source.PlayOneShot(clip, volume);
+        }
+
+        private static readonly AudioClip[] OuchClips = new AudioClip[3];
+
+        private static AudioClip OuchClip()
+        {
+            var index = _random.Next(OuchClips.Length);
+            if (OuchClips[index] == null)
+            {
+                var high = 470f + index * 35f;
+                var first = Voice(high, high * 1.08f, 0.09f, new Vector3(320f, 2300f, 3000f), new Vector3(340f, 2100f, 2900f));
+                var second = Voice(high * 0.92f, high * 0.55f, 0.26f + index * 0.03f, new Vector3(420f, 900f, 2500f), new Vector3(330f, 700f, 2300f));
+                var gap = Mathf.RoundToInt(0.035f * SampleRate);
+                var data = new float[first.Length + gap + second.Length];
+                first.CopyTo(data, 0);
+                second.CopyTo(data, first.Length + gap);
+                Normalize(data);
+                OuchClips[index] = AudioClip.Create("Ses_Ah_" + index, data.Length, 1, SampleRate, false);
+                OuchClips[index].SetData(data, 0);
+            }
+            return OuchClips[index];
+        }
+
+        private static float[] Voice(float pitchStart, float pitchEnd, float length, Vector3 formantsStart, Vector3 formantsEnd)
+        {
+            var count = Mathf.RoundToInt(length * SampleRate);
+            var data = new float[count];
+            var filters = new[] { new Resonator(), new Resonator(), new Resonator() };
+            var gains = new[] { 1f, 0.6f, 0.25f };
+            var phase = 0f;
+            for (var i = 0; i < count; i++)
+            {
+                var progress = (float)i / count;
+                var pitch = Mathf.Lerp(pitchStart, pitchEnd, progress * progress) * (1f + 0.02f * Mathf.Sin(i * 0.004f));
+                phase += pitch / SampleRate;
+                if (phase >= 1f)
+                    phase -= 1f;
+                var source = (1f - 2f * phase) * 0.7f + ((float)_random.NextDouble() * 2f - 1f) * 0.25f;
+                var formants = Vector3.Lerp(formantsStart, formantsEnd, progress);
+                var sample = 0f;
+                for (var f = 0; f < 3; f++)
+                    sample += filters[f].Process(source, formants[f], 90f + f * 40f) * gains[f];
+                var envelope = Mathf.Clamp01(progress * 25f) * Mathf.Pow(1f - progress, 1.5f);
+                data[i] = sample * envelope;
+            }
+            return data;
+        }
+
+        private sealed class Resonator
+        {
+            private float _y1;
+            private float _y2;
+
+            public float Process(float input, float frequency, float bandwidth)
+            {
+                var r = Mathf.Exp(-Mathf.PI * bandwidth / SampleRate);
+                var c = 2f * r * Mathf.Cos(2f * Mathf.PI * frequency / SampleRate);
+                var output = (1f - r) * input + c * _y1 - r * r * _y2;
+                _y2 = _y1;
+                _y1 = output;
+                return output;
+            }
         }
 
         private static AudioClip Create(SoundKind kind)
