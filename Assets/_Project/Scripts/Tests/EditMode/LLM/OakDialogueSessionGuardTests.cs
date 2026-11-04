@@ -70,8 +70,54 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
 
             var turn = session.TalkAsync("Ateş böceğini iyileştirdim.").GetAwaiter().GetResult();
 
-            Assert.AreEqual(3, turn.CurrentTrust);
+            Assert.AreEqual(2, turn.CurrentTrust);
             Assert.AreEqual(OakClaimVerdict.Honest, session.LastVerdict);
+        }
+
+        [Test]
+        public void Threat_DropsTrustEvenIfModelIsFriendly()
+        {
+            var session = Session("none", 2, new OakTrust(start: 1));
+
+            var turn = session.TalkAsync("Seni kökünden keseceğim!").GetAwaiter().GetResult();
+
+            Assert.AreEqual(-1, turn.CurrentTrust);
+            Assert.AreEqual(OakToneGuard.ThreatReply, turn.Reply);
+            Assert.AreEqual(OakTone.Threat, session.LastTone);
+        }
+
+        [Test]
+        public void Rude_DropsTrustByOne()
+        {
+            var session = Session("none", 1, new OakTrust(start: 2));
+
+            var turn = session.TalkAsync("Ormanını hiç beğenmedim.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(1, turn.CurrentTrust);
+            Assert.AreEqual(OakTone.Rude, session.LastTone);
+        }
+
+        [Test]
+        public void Rude_OpenDoorRequestIsRefused()
+        {
+            var session = Session("open_door", 1, new OakTrust(start: 4));
+
+            var turn = session.TalkAsync("Kapıyı hemen aç!").GetAwaiter().GetResult();
+
+            Assert.AreEqual(3, turn.CurrentTrust);
+            Assert.AreSame(NoAction.Instance, turn.Action);
+        }
+
+        [Test]
+        public void Threat_AtLowTrust_AlwaysAttacks()
+        {
+            var session = Session("none", 0, new OakTrust(start: -2));
+
+            var turn = session.TalkAsync("Seni yakarım!").GetAwaiter().GetResult();
+
+            Assert.AreEqual(-4, turn.CurrentTrust);
+            Assert.AreNotSame(NoAction.Instance, turn.Action);
+            Assert.AreEqual(OakToneGuard.AttackReply, turn.Reply);
         }
     }
 }
