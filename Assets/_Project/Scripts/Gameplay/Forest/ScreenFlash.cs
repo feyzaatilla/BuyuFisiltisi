@@ -4,8 +4,6 @@ namespace BuyuFisiltisi.Gameplay.Forest
 {
     public sealed class ScreenFlash : MonoBehaviour
     {
-        private const float FlashRate = 4f;
-
         private static ScreenFlash _instance;
 
         private float _start;
@@ -31,16 +29,15 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 return;
 
             var progress = Mathf.InverseLerp(_start, _until, now);
-            var strength = 1f - progress * progress;
-            var red = Mathf.Repeat((now - _start) * FlashRate, 1f) < 0.5f;
-            var tint = red ? new Color(1f, 0.1f, 0.15f) : new Color(0.15f, 0.35f, 1f);
-            var blind = Mathf.Clamp01(1f - (now - _start) / 0.35f);
+            var strength = Mathf.Sin(progress * Mathf.PI);
+            var tint = Color.Lerp(new Color(0.9f, 0.2f, 0.3f), new Color(0.25f, 0.35f, 0.9f), Mathf.SmoothStep(0f, 1f, progress));
+            var blind = Mathf.Sin(Mathf.Clamp01((now - _start) / 0.6f) * Mathf.PI);
 
             GUI.depth = 10;
             var previous = GUI.color;
-            GUI.color = new Color(0f, 0f, 0f, blind * 0.9f);
+            GUI.color = new Color(0f, 0f, 0f, blind * 0.45f);
             GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
-            GUI.color = new Color(tint.r, tint.g, tint.b, 0.45f * strength);
+            GUI.color = new Color(tint.r, tint.g, tint.b, 0.18f * strength);
             GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), Texture2D.whiteTexture);
             GUI.color = previous;
         }
