@@ -7,12 +7,25 @@ namespace BuyuFisiltisi.UI.Intro
     {
         private enum Phase
         {
+            Title,
             Lost,
             Arrival,
             Pages,
             Shrink,
             Done
         }
+
+        private const string GameTitle = "Büyü\nFısıltısı";
+
+        private const string TitleText = "Kaybolmuş bir cadı, konuşan eski bir büyü kitabı ve sesi susturulmuş bir orman.\n\nOrmanın şarkısını geri getirmek senin elinde.";
+
+        private static readonly string[] PageTitles =
+        {
+            "Susan Orman",
+            "Bulutlar ve Köprü",
+            "Çiçek Vadisi",
+            "Yaşlı Meşe"
+        };
 
         private static readonly string[] LostLines =
         {
@@ -52,10 +65,16 @@ namespace BuyuFisiltisi.UI.Intro
         private Vector3 _shrinkFrom;
         private Transform _camera;
         private GUIStyle _subtitleStyle;
-        private GUIStyle _pageStyle;
         private GUIStyle _hintStyle;
         private Texture2D _black;
         private Texture2D _paper;
+        private Texture2D _leather;
+        private GUIStyle _titleStyle;
+        private GUIStyle _headingStyle;
+        private GUIStyle _bodyStyle;
+        private GUIStyle _smallStyle;
+        private float _flipStarted = -10f;
+        private int _flipFrom;
 
         public bool IsRunning => _phase != Phase.Done;
 
@@ -83,7 +102,7 @@ namespace BuyuFisiltisi.UI.Intro
             _introBook.position = _bookTarget + Vector3.up * 5f;
             _introBook.gameObject.SetActive(false);
             SetBookOpen(false);
-            Begin(Phase.Lost);
+            Begin(Phase.Title);
         }
 
         private void OnDisable()
@@ -130,6 +149,11 @@ namespace BuyuFisiltisi.UI.Intro
 
             switch (_phase)
             {
+                case Phase.Title:
+                    if (elapsed > 1f && (next || elapsed >= 9f))
+                        Begin(Phase.Lost);
+                    break;
+
                 case Phase.Lost:
                     OrbitCamera(elapsed);
                     if (next || lineElapsed >= _lineSeconds)
@@ -149,8 +173,15 @@ namespace BuyuFisiltisi.UI.Intro
                     _introBook.position = _bookTarget + Vector3.up * Mathf.Sin(Time.unscaledTime * 2f) * 0.08f;
                     FaceWitch();
                     LookAtBook();
-                    if (next || lineElapsed >= _lineSeconds + 2f)
+                    if (Time.unscaledTime - _flipStarted > 0.7f && (next || lineElapsed >= _lineSeconds + 5f))
+                    {
+                        if (_line + 1 < PageLines.Length)
+                        {
+                            _flipFrom = _line;
+                            _flipStarted = Time.unscaledTime;
+                        }
                         AdvanceLine(PageLines.Length, Phase.Shrink);
+                    }
                     break;
 
                 case Phase.Shrink:
@@ -233,7 +264,13 @@ namespace BuyuFisiltisi.UI.Intro
 
             EnsureStyles();
 
-            if (_phase == Phase.Lost)
+            if (_phase == Phase.Title)
+            {
+                GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), _black);
+                var appear = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((Time.unscaledTime - _phaseStarted) / 1.2f));
+                DrawBook(appear, GameTitle, true, TitleText, "Başlamak için Space", 1f, null);
+            }
+            else if (_phase == Phase.Lost)
             {
                 var previous = GUI.color;
                 GUI.color = new Color(1f, 1f, 1f, 0.55f);
@@ -247,14 +284,76 @@ namespace BuyuFisiltisi.UI.Intro
             }
             else if (_phase == Phase.Pages)
             {
-                var width = Mathf.Min(640f, Screen.width - 40f);
-                var rect = new Rect((Screen.width - width) / 2f, Screen.height - 250f, width, 180f);
-                GUI.DrawTexture(rect, _paper);
-                GUI.Label(new Rect(rect.x + 24f, rect.y + 16f, rect.width - 48f, rect.height - 46f), PageLines[Mathf.Min(_line, PageLines.Length - 1)], _pageStyle);
-                GUI.Label(new Rect(rect.x, rect.yMax - 30f, rect.width, 24f), "Sayfa " + (Mathf.Min(_line, PageLines.Length - 1) + 1) + " / " + PageLines.Length, _hintStyle);
+                var previous = GUI.color;
+                GUI.color = new Color(1f, 1f, 1f, 0.6f);
+                GUI.DrawTexture(new Rect(0f, 0f, Screen.width, Screen.height), _black);
+                GUI.color = previous;
+                var index = Mathf.Min(_line, PageLines.Length - 1);
+                var appear = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((Time.unscaledTime - _phaseStarted) / 0.8f));
+                var flip = Mathf.Clamp01((Time.unscaledTime - _flipStarted) / 0.7f);
+                var leftIndex = flip < 0.5f ? _flipFrom : index;
+                DrawBook(appear, PageTitles[leftIndex], false, PageLines[index], (index + 1) + " / " + PageLines.Length, flip, (leftIndex + 1) + ". Sayfa");
             }
 
             GUI.Label(new Rect(0f, Screen.height - 40f, Screen.width, 30f), "Space: devam · Esc: geç", _hintStyle);
+        }
+
+        private void DrawBook(float appear, string heading, bool isTitle, string body, string footer, float flip, string pageLabel)
+        {
+            var height = Mathf.Min(Screen.width * 0.9f * 0.62f, Screen.height * 0.8f, 780f);
+            var width = height / 0.62f;
+            var scale = Mathf.Lerp(0.75f, 1f, appear);
+            var book = new Rect((Screen.width - width * scale) / 2f, (Screen.height - height * scale) / 2f - 20f, width * scale, height * scale);
+            var previous = GUI.color;
+            GUI.color = new Color(1f, 1f, 1f, appear);
+
+            GUI.DrawTexture(book, _leather);
+            var inset = book.height * 0.035f;
+            var inner = new Rect(book.x + inset, book.y + inset, book.width - inset * 2f, book.height - inset * 2f);
+            var half = inner.width / 2f;
+            var gutter = inner.x + half;
+            var left = new Rect(inner.x, inner.y, half, inner.height);
+            var right = new Rect(gutter, inner.y, half, inner.height);
+            GUI.DrawTexture(left, _paper);
+            GUI.DrawTexture(right, _paper);
+            GUI.color = new Color(0f, 0f, 0f, 0.22f * appear);
+            GUI.DrawTexture(new Rect(gutter - book.width * 0.012f, inner.y, book.width * 0.024f, inner.height), _black);
+            GUI.color = new Color(1f, 1f, 1f, appear);
+
+            _titleStyle.fontSize = Mathf.RoundToInt(book.height * 0.13f);
+            _headingStyle.fontSize = Mathf.RoundToInt(book.height * 0.075f);
+            _bodyStyle.fontSize = Mathf.RoundToInt(book.height * 0.047f);
+            _smallStyle.fontSize = Mathf.RoundToInt(book.height * 0.032f);
+
+            var pad = half * 0.11f;
+            var leftArea = new Rect(left.x + pad, left.y + pad, left.width - pad * 2f, left.height - pad * 2f);
+            var rightArea = new Rect(right.x + pad, right.y + pad, right.width - pad * 2f, right.height - pad * 2f);
+
+            if (isTitle)
+            {
+                GUI.Label(new Rect(leftArea.x, leftArea.y, leftArea.width, leftArea.height * 0.8f), heading, _titleStyle);
+                GUI.Label(new Rect(leftArea.x, leftArea.y + leftArea.height * 0.78f, leftArea.width, leftArea.height * 0.2f), "• • •", _headingStyle);
+            }
+            else
+            {
+                GUI.Label(new Rect(leftArea.x, leftArea.y + leftArea.height * 0.2f, leftArea.width, leftArea.height * 0.15f), pageLabel, _smallStyle);
+                GUI.Label(new Rect(leftArea.x, leftArea.y + leftArea.height * 0.35f, leftArea.width, leftArea.height * 0.3f), heading, _headingStyle);
+                GUI.Label(new Rect(leftArea.x, leftArea.y + leftArea.height * 0.65f, leftArea.width, leftArea.height * 0.15f), "• • •", _smallStyle);
+            }
+
+            GUI.Label(new Rect(rightArea.x, rightArea.y, rightArea.width, rightArea.height * 0.88f), body, _bodyStyle);
+            GUI.Label(new Rect(rightArea.x, rightArea.y + rightArea.height * 0.9f, rightArea.width, rightArea.height * 0.1f), footer, _smallStyle);
+
+            if (flip < 1f)
+            {
+                var sheetWidth = flip < 0.5f ? half * (1f - flip * 2f) : half * (flip * 2f - 1f);
+                var sheet = flip < 0.5f ? new Rect(gutter, inner.y, sheetWidth, inner.height) : new Rect(gutter - sheetWidth, inner.y, sheetWidth, inner.height);
+                var shade = Mathf.Lerp(1f, 0.78f, Mathf.Sin(flip * Mathf.PI));
+                GUI.color = new Color(shade, shade * 0.97f, shade * 0.9f, appear);
+                GUI.DrawTexture(sheet, _paper);
+            }
+
+            GUI.color = previous;
         }
 
         private void Subtitle(string text)
@@ -270,8 +369,6 @@ namespace BuyuFisiltisi.UI.Intro
 
             _subtitleStyle = new GUIStyle(GUI.skin.label) { fontSize = 26, alignment = TextAnchor.MiddleCenter, wordWrap = true };
             _subtitleStyle.normal.textColor = new Color(1f, 0.95f, 0.8f);
-            _pageStyle = new GUIStyle(GUI.skin.label) { fontSize = 21, alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Italic };
-            _pageStyle.normal.textColor = new Color(0.32f, 0.1f, 0.55f);
             _hintStyle = new GUIStyle(GUI.skin.label) { fontSize = 15, alignment = TextAnchor.MiddleCenter };
             _hintStyle.normal.textColor = new Color(0.6f, 0.55f, 0.5f);
             _black = new Texture2D(1, 1);
@@ -280,6 +377,17 @@ namespace BuyuFisiltisi.UI.Intro
             _paper = new Texture2D(1, 1);
             _paper.SetPixel(0, 0, new Color(0.95f, 0.9f, 0.76f, 0.96f));
             _paper.Apply();
+            _leather = new Texture2D(1, 1);
+            _leather.SetPixel(0, 0, new Color(0.3f, 0.15f, 0.08f));
+            _leather.Apply();
+            _titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Bold };
+            _titleStyle.normal.textColor = new Color(0.35f, 0.1f, 0.5f);
+            _headingStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Bold };
+            _headingStyle.normal.textColor = new Color(0.4f, 0.18f, 0.06f);
+            _bodyStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Italic };
+            _bodyStyle.normal.textColor = new Color(0.28f, 0.1f, 0.45f);
+            _smallStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true };
+            _smallStyle.normal.textColor = new Color(0.45f, 0.32f, 0.22f);
         }
     }
 }
