@@ -143,16 +143,31 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
-        public void Praise_WithDeed_ReachesDoor()
+        public void Praise_AllTasksDone_ReachesDoor()
         {
             var session = Session("none", 0, new OakTrust(start: 1));
-            session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
+            foreach (var deed in OakDeedCatalogTests.AllDeeds)
+                session.AddDeed(deed);
 
             session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
             session.TalkAsync("Sen çok bilgesin.").GetAwaiter().GetResult();
             var turn = session.TalkAsync("Teşekkür ederim.").GetAwaiter().GetResult();
 
             Assert.AreEqual(3, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void Praise_WithSomeTasks_StopsBelowDoor()
+        {
+            var session = Session("none", 0, new OakTrust(start: 0));
+            session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
+
+            session.TalkAsync("Ormanın çok güzel.").GetAwaiter().GetResult();
+            session.TalkAsync("Sen çok bilgesin.").GetAwaiter().GetResult();
+            var turn = session.TalkAsync("Harika bir ağaçsın.").GetAwaiter().GetResult();
+
+            Assert.AreEqual(2, turn.CurrentTrust);
+            Assert.AreEqual(OakToneGuard.PraiseCeilingReply, turn.Reply);
         }
 
         [Test]

@@ -93,6 +93,20 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
+        public void DeedBonus_WithMissingTask_GivesZero()
+        {
+            var deeds = new[] { OakDeedCatalogTests.AllDeeds[0], OakDeedCatalogTests.AllDeeds[1] };
+
+            Assert.AreEqual(0, OakGreeting.DeedBonus(new OakTrust(), deeds));
+        }
+
+        [Test]
+        public void DeedBonus_AllTasksDone_GivesOne()
+        {
+            Assert.AreEqual(1, OakGreeting.DeedBonus(new OakTrust(), OakDeedCatalogTests.AllDeeds));
+        }
+
+        [Test]
         public void DeedBonus_NullTrust_GivesZero()
         {
             Assert.AreEqual(0, OakGreeting.DeedBonus(null));
