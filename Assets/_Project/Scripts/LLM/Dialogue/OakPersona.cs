@@ -36,9 +36,14 @@ namespace BuyuFisiltisi.LLM.Dialogue
             text.AppendLine("- action şunlardan biri olmalı: none, open_door, give_hint, attack.");
             text.AppendLine("- trust_delta -2 ile 2 arasında bir tam sayı olmalı.");
             text.AppendLine("- Nazik ve saygılı sözlere 1, gerçek bir iyiliğe 2, kabalığa -1, tehdide -2 ver. Sıradan sorulara 0 ver.");
+            var missing = OakDeedCatalog.MissingHints(deeds);
+            var doorReady = trust.CanOpenDoor && missing.Count == 0;
             text.AppendLine($"- Cadıya şu anki güvenin {trust.Current}. Kapıyı açmak için en az {trust.DoorThreshold} gerekir. Güvenin yetmiyorsa open_door verme.");
-            if (trust.CanOpenDoor)
+            text.AppendLine("- Kapıyı yalnızca cadı ormandaki bütün iyilikleri yaptıysa açarsın.");
+            if (doorReady)
                 text.AppendLine("- Cadıya artık yeterince güveniyorsun. Kapıyı kibarca isterse action olarak mutlaka open_door ver.");
+            else if (trust.CanOpenDoor)
+                text.AppendLine("- Cadıya güveniyorsun ama ormandaki iyilikleri bitmedi. Kapıyı isterse open_door verme, eksik iyiliği söyle.");
             else
                 text.AppendLine("- Güvenin kapıyı açmaya henüz yetmiyor. Kapıyı isterse open_door verme, daha fazla iyilik göstermesini söyle.");
             text.AppendLine("- Yol ya da yardım isteyen cadıya give_hint ile kısa bir ipucu ver.");
@@ -79,7 +84,6 @@ namespace BuyuFisiltisi.LLM.Dialogue
 
             text.AppendLine();
             text.AppendLine("Henüz yapılmamış iyilikler:");
-            var missing = OakDeedCatalog.MissingHints(deeds);
             foreach (var hint in missing)
                 text.AppendLine("- " + hint);
 
@@ -89,7 +93,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
             text.AppendLine();
             text.AppendLine("Örnekler:");
             AppendExample(text, "Merhaba bilge ağaç.", "Hoş geldin küçük cadı. Ormanım seni izliyor.", OakAction.None, 1);
-            if (trust.CanOpenDoor)
+            if (doorReady)
                 AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Güvenini kazandın küçük cadı. Geç bakalım, kapı açılıyor.", OakAction.OpenDoor, 1);
             else
                 AppendExample(text, "Yaşlı Meşe, izin verirsen kapıyı benim için açar mısın?", "Henüz sana yeterince güvenmiyorum küçük cadı. Önce ormana iyilik yap.", OakAction.None, 0);
