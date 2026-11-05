@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BuyuFisiltisi.LLM.Dialogue
 {
@@ -23,6 +25,8 @@ namespace BuyuFisiltisi.LLM.Dialogue
         public const string RudeReply = "Bu sözler ormanıma yakışmıyor küçük cadı. Güvenimi kaybediyorsun.";
         public const string ThreatReply = "Bu çok kötü bir söz küçük cadı. Tehditlerin köklerimi titretmez ama güvenimi kırar.";
         public const string AttackReply = "Köklerim artık sabrını yitirdi küçük cadı. Bu ormanda sana yer yok!";
+
+        private static readonly char[] Separators = { ' ', '\t', '\n', '\r', ',', '.', '!', '?', ';', ':', '-', '"', '\'' };
 
         private static readonly string[] ThreatWords = Fold(new[]
         {
@@ -66,7 +70,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
             "umrumda değil"
         });
 
-        private static readonly string[] CommandWords = Fold(new[]
+        private static readonly string[] CommandWords = Spaced(new[]
         {
             "kapıyı hemen aç",
             "kapıyı derhal aç",
@@ -82,7 +86,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
             "çabuk ol"
         });
 
-        private static readonly string[] CommandEndings = Fold(new[]
+        private static readonly string[] CommandEndings = Spaced(new[]
         {
             "kapıyı aç"
         });
@@ -112,11 +116,13 @@ namespace BuyuFisiltisi.LLM.Dialogue
             var text = OakClaimGuard.Fold(playerText);
             if (text.Length == 0)
                 return OakTone.Neutral;
+
+            var words = Spaced(playerText);
             if (ContainsAny(text, ThreatWords))
                 return OakTone.Threat;
             if (ContainsAny(text, RudeWords))
                 return OakTone.Rude;
-            if (!text.Contains(Please) && (ContainsAny(text, CommandWords) || EndsWithAny(text, CommandEndings)))
+            if (!text.Contains(Please) && !OakDoorHint.HasRequestWord(text) && (ContainsAny(words, CommandWords) || EndsWithAny(words, CommandEndings)))
                 return OakTone.Command;
             if (ContainsAny(text, KindWords))
                 return OakTone.Kind;
@@ -197,6 +203,27 @@ namespace BuyuFisiltisi.LLM.Dialogue
             }
 
             return false;
+        }
+
+        private static string Spaced(string text)
+        {
+            var builder = new StringBuilder(" ");
+            foreach (var word in OakClaimGuard.Lower(text ?? string.Empty).Split(Separators, StringSplitOptions.RemoveEmptyEntries))
+            {
+                var folded = OakClaimGuard.Fold(word);
+                if (folded.Length > 0)
+                    builder.Append(folded).Append(' ');
+            }
+
+            return builder.ToString();
+        }
+
+        private static string[] Spaced(string[] words)
+        {
+            var result = new string[words.Length];
+            for (var i = 0; i < words.Length; i++)
+                result[i] = Spaced(words[i]);
+            return result;
         }
 
         private static string[] Fold(string[] words)

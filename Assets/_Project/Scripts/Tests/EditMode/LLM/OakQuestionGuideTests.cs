@@ -17,7 +17,16 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         public void DoorQuestion_GetsDoorAnswer()
         {
             Assert.AreEqual(OakDoorHint.LockedReply, Answer("Kapıyı nasıl açabilirim?"));
-            Assert.AreEqual(OakDoorHint.ReadyReply, Answer("Kapıyı nasıl açabilirim?", null, true));
+            Assert.AreEqual(OakDoorHint.ReadyReply, Answer("Kapıyı nasıl açabilirim?", OakDeedCatalogTests.AllDeeds, true));
+        }
+
+        [Test]
+        public void DoorQuestion_TrustedWithMissingTask_NamesTask()
+        {
+            var reply = Answer("Kapıyı nasıl açabilirim?", null, true);
+
+            StringAssert.StartsWith(OakDoorHint.UnfinishedReply, reply);
+            StringAssert.Contains("bulut", reply);
         }
 
         [TestCase("Köprüyü nasıl geçerim?", OakQuestionGuide.BridgeReply)]

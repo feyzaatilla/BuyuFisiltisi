@@ -92,12 +92,26 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         public void OpenDoor_WithEnoughTrust_KeepsAction()
         {
             var session = Session(new FakeTransport(() => HttpResult.Ok(Reply("open_door", 1))), new OakTrust(2));
-            session.AddDeed("Yaralı ateş böceği Işık Çayı ile iyileştirildi.");
+            foreach (var deed in OakDeedCatalogTests.AllDeeds)
+                session.AddDeed(deed);
 
             var turn = Talk(session, "Lütfen kapıyı benim için açar mısın?");
 
             Assert.AreEqual(3, turn.CurrentTrust);
             Assert.IsInstanceOf<OpenDoorAction>(turn.Action);
+        }
+
+        [Test]
+        public void OpenDoor_WithEnoughTrustButMissingTask_StaysClosed()
+        {
+            var session = Session(new FakeTransport(() => HttpResult.Ok(Reply("open_door", 1))), new OakTrust(3));
+            session.AddDeed("Ormanın üzerindeki kara bulutları dağıttı.");
+
+            var turn = Talk(session, "Selam");
+
+            Assert.AreSame(NoAction.Instance, turn.Action);
+            StringAssert.StartsWith(OakDoorHint.UnfinishedReply, turn.Reply);
+            StringAssert.Contains("ateş böceği", turn.Reply);
         }
 
         [Test]

@@ -61,7 +61,8 @@ namespace BuyuFisiltisi.LLM.Dialogue
             reply = null;
             if (OakDoorHint.IsDoorQuestion(playerText))
             {
-                reply = canOpenDoor ? OakDoorHint.ReadyReply : OakDoorHint.LockedReply;
+                var left = OakDeedCatalog.MissingHints(deeds);
+                reply = !canOpenDoor ? OakDoorHint.LockedReply : left.Count > 0 ? OakDoorHint.Unfinished(left[0]) : OakDoorHint.ReadyReply;
                 return true;
             }
 

@@ -64,11 +64,15 @@ namespace BuyuFisiltisi.LLM.Dialogue
             if (tone == OakTone.Kind && Trust.Current >= PraiseCeiling)
                 checkedResponse = new OakResponse(deeds.Count == 0 ? OakToneGuard.PraiseCeilingReply : checkedResponse.Reply, checkedResponse.Action, 0);
 
+            var missing = OakDeedCatalog.MissingHints(deeds);
             var calm = verdict == OakClaimVerdict.Honest && !OakToneGuard.IsAngry(tone);
             if (calm && OakDoorHint.IsDoorRequest(text))
-                checkedResponse = OakDoorHint.Request(checkedResponse, Trust.Current + checkedResponse.TrustDelta >= Trust.DoorThreshold);
+                checkedResponse = OakDoorHint.Request(checkedResponse, Trust.Current + checkedResponse.TrustDelta >= Trust.DoorThreshold, missing);
             else if (calm && OakQuestionGuide.TryAnswer(text, deeds, Trust.CanOpenDoor, out var guide))
                 checkedResponse = OakQuestionGuide.Apply(checkedResponse, guide);
+
+            if (checkedResponse.Action == OakAction.OpenDoor && missing.Count > 0)
+                checkedResponse = OakDoorHint.Request(checkedResponse, Trust.Current + checkedResponse.TrustDelta >= Trust.DoorThreshold, missing);
 
             checkedResponse = OakToneGuard.Escalate(checkedResponse, tone, Trust.Current, Trust.AttackThreshold, Trust.Min);
             var gated = OakResponseGate.ApplyTurn(checkedResponse, Trust);

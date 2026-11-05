@@ -9,6 +9,9 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         [TestCase("Bunu hemen açıklar mısın?")]
         [TestCase("Hava nasıl?")]
         [TestCase("Teşekkür ederim")]
+        [TestCase("dediklerini yaptım yaşlı ağaç kapıyı açar mısın")]
+        [TestCase("Yaşlı ağaç kapıyı açabilir misin?")]
+        [TestCase("Yaşlı ağaç kapıyı nasıl açarım?")]
         [TestCase("")]
         public void Ordinary_IsNeutral(string text)
         {
