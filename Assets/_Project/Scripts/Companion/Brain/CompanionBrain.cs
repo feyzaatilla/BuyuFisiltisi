@@ -67,7 +67,7 @@ namespace BuyuFisiltisi.Companion.Brain
 
             if (body.IsStuck)
             {
-                FailTask(CompanionTaskOutcome.Failed);
+                FailTask(body.IsBlocked ? CompanionTaskOutcome.Blocked : CompanionTaskOutcome.Failed);
                 return;
             }
 
