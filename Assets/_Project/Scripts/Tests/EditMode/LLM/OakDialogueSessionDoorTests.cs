@@ -25,7 +25,15 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
             }
         }
 
-        private static OakDialogueSession Session(OakTrust trust)
+        private static OakDialogueSession Session(OakTrust trust, params string[] deeds)
+        {
+            var session = Create(trust);
+            foreach (var deed in deeds)
+                session.AddDeed(deed);
+            return session;
+        }
+
+        private static OakDialogueSession Create(OakTrust trust)
         {
             var content = "{\"reply\":\"Büyü Kitabı'nı aç ve Fısıl'a şalteri çekmesini söyle.\",\"action\":\"give_hint\",\"trust_delta\":1}";
             var body = "{\"message\":{\"role\":\"assistant\",\"content\":\"" + content.Replace("\"", "\\\"") + "\"},\"done\":true}";
@@ -45,19 +53,58 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         [Test]
         public void DoorQuestion_HighTrust_TellsToAskPolitely()
         {
-            var turn = Session(new OakTrust(start: 3)).TalkAsync("Kapıyı nasıl açabilirim?").GetAwaiter().GetResult();
+            var turn = Session(new OakTrust(start: 3), OakDeedCatalogTests.AllDeeds).TalkAsync("Kapıyı nasıl açabilirim?").GetAwaiter().GetResult();
 
             Assert.AreEqual(OakDoorHint.ReadyReply, turn.Reply);
             Assert.AreEqual(3, turn.CurrentTrust);
         }
-    
+
+        [Test]
+        public void DoorQuestion_HighTrustMissingTask_NamesTask()
+        {
+            var turn = Session(new OakTrust(start: 3), "Ormanın üzerindeki kara bulutları dağıttı.").TalkAsync("Kapıyı nasıl açabilirim?").GetAwaiter().GetResult();
+
+            StringAssert.StartsWith(OakDoorHint.UnfinishedReply, turn.Reply);
+            StringAssert.Contains("ateş böceği", turn.Reply);
+        }
+
         [Test]
         public void PoliteRequest_AtTrustThree_AlwaysOpensDoor()
         {
-            var turn = Session(new OakTrust(start: 3)).TalkAsync("iznin olursa kapıyı benim için açar mısın").GetAwaiter().GetResult();
+            var turn = Session(new OakTrust(start: 3), OakDeedCatalogTests.AllDeeds).TalkAsync("iznin olursa kapıyı benim için açar mısın").GetAwaiter().GetResult();
 
             Assert.IsInstanceOf<OpenDoorAction>(turn.Action);
             Assert.AreEqual(OakDoorHint.OpenReply, turn.Reply);
+        }
+
+        [Test]
+        public void PoliteRequest_TrustThreeMissingFirefly_StaysClosed()
+        {
+            var deeds = new[]
+            {
+                OakDeedCatalogTests.AllDeeds[0],
+                OakDeedCatalogTests.AllDeeds[2],
+                OakDeedCatalogTests.AllDeeds[3],
+                OakDeedCatalogTests.AllDeeds[4]
+            };
+
+            var turn = Session(new OakTrust(start: 3), deeds).TalkAsync("kapıyı açar mısın yaşlı meşe").GetAwaiter().GetResult();
+
+            Assert.AreSame(NoAction.Instance, turn.Action);
+            StringAssert.StartsWith(OakDoorHint.UnfinishedReply, turn.Reply);
+            StringAssert.Contains("Işık Çayı", turn.Reply);
+            StringAssert.EndsWith(OakDoorHint.UnfinishedEnding, turn.Reply);
+            Assert.AreEqual(3, turn.CurrentTrust);
+        }
+
+        [Test]
+        public void QuestionAfterAgac_IsNotCommand()
+        {
+            var turn = Session(new OakTrust(start: 3), OakDeedCatalogTests.AllDeeds).TalkAsync("dediklerini yaptım yaşlı ağaç kapıyı açar mısın").GetAwaiter().GetResult();
+
+            Assert.IsInstanceOf<OpenDoorAction>(turn.Action);
+            Assert.AreEqual(OakDoorHint.OpenReply, turn.Reply);
+            Assert.AreEqual(3, turn.CurrentTrust);
         }
 
         [Test]

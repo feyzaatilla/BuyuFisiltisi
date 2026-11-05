@@ -5,7 +5,7 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
 {
     public class OakDeedCatalogTests
     {
-        private static readonly string[] AllDeeds =
+        internal static readonly string[] AllDeeds =
         {
             "Ormanın üzerindeki kara bulutları dağıttı.",
             "Yaralı ateş böceği Işık Çayı ile iyileştirildi.",

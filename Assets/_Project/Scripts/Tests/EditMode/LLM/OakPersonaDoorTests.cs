@@ -8,7 +8,7 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         [Test]
         public void Prompt_WithEnoughTrust_TellsOakToOpenDoor()
         {
-            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), null);
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), OakDeedCatalogTests.AllDeeds);
 
             StringAssert.Contains("yeterince güveniyorsun", prompt);
         }
@@ -25,10 +25,20 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         [Test]
         public void Prompt_WithEnoughTrust_HasOpenDoorExample()
         {
-            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), null);
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), OakDeedCatalogTests.AllDeeds);
 
             StringAssert.Contains("kapıyı benim için açar mısın?", prompt);
             StringAssert.Contains("kapı açılıyor", prompt);
+        }
+
+        [Test]
+        public void Prompt_WithEnoughTrustButMissingTask_HasNoOpenDoorExample()
+        {
+            var prompt = OakPersona.BuildSystemPrompt(new OakTrust(start: 3), null);
+
+            StringAssert.Contains("iyilikleri bitmedi", prompt);
+            StringAssert.DoesNotContain("yeterince güveniyorsun", prompt);
+            StringAssert.DoesNotContain("kapı açılıyor", prompt);
         }
 
         [Test]

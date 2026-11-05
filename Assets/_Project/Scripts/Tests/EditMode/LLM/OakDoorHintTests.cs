@@ -67,6 +67,17 @@ namespace BuyuFisiltisi.Tests.EditMode.LLM
         }
 
         [Test]
+        public void Request_TrustedWithMissingTask_NamesTask()
+        {
+            var missing = new[] { "Yaralı ateş böceği hâlâ ışıksız." };
+
+            var result = OakDoorHint.Request(new OakResponse("Peki.", OakAction.OpenDoor, 0), true, missing);
+
+            Assert.AreEqual(OakAction.None, result.Action);
+            Assert.AreEqual(OakDoorHint.UnfinishedReply + " Yaralı ateş böceği hâlâ ışıksız. " + OakDoorHint.UnfinishedEnding, result.Reply);
+        }
+
+        [Test]
         public void Request_NotTrusted_KeepsDoorClosed()
         {
             var result = OakDoorHint.Request(new OakResponse("Peki.", OakAction.OpenDoor, 0), false);
