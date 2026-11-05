@@ -1,3 +1,4 @@
+using BuyuFisiltisi.Companion.Brain;
 using BuyuFisiltisi.Companion.Sensors;
 using NUnit.Framework;
 using UnityEngine;
@@ -81,6 +82,33 @@ namespace BuyuFisiltisi.Tests.EditMode.Sensors
             sensor.Sense(0.1f);
 
             Assert.AreEqual(0.7f, sensor.Current.NearestDistance, 0.001f);
+        }
+
+        [Test]
+        public void PathBlocked_WhenCenterHitIsBeforeTarget()
+        {
+            var obstacles = new ObstacleReading(false, true, false, 0.5f);
+            var target = new TargetReading(true, 3f, 10f, false);
+
+            Assert.IsTrue(CompanionController.PathBlocked(obstacles, target));
+        }
+
+        [Test]
+        public void PathNotBlocked_WhenObstacleIsBehindTarget()
+        {
+            var obstacles = new ObstacleReading(false, true, false, 1.2f);
+            var target = new TargetReading(true, 0.8f, 0f, false);
+
+            Assert.IsFalse(CompanionController.PathBlocked(obstacles, target));
+        }
+
+        [Test]
+        public void PathNotBlocked_WhenOnlySidesHit()
+        {
+            var obstacles = new ObstacleReading(true, false, true, 0.3f);
+            var target = new TargetReading(true, 3f, 0f, false);
+
+            Assert.IsFalse(CompanionController.PathBlocked(obstacles, target));
         }
     }
 }

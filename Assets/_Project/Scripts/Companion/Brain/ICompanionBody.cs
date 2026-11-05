@@ -7,6 +7,7 @@ namespace BuyuFisiltisi.Companion.Brain
         GameObject Self { get; }
         bool HasArrived { get; }
         bool IsStuck { get; }
+        bool IsBlocked { get; }
         void FollowPlayer();
         bool MoveTo(Vector3 destination);
         void Stop();

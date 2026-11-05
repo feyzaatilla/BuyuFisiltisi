@@ -27,7 +27,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
         public int HistoryCount => conversation.Count;
         public OakClaimVerdict LastVerdict { get; private set; } = OakClaimVerdict.Honest;
         public OakTone LastTone { get; private set; } = OakTone.Neutral;
-        public int PraiseCeiling => OakToneGuard.PraiseCeiling(Trust, deeds.Count > 0);
+        public int PraiseCeiling => OakToneGuard.PraiseCeiling(Trust, OakDeedCatalog.MissingHints(deeds).Count == 0);
 
         public bool AddDeed(string description)
         {
@@ -62,7 +62,7 @@ namespace BuyuFisiltisi.LLM.Dialogue
             if (verdict == OakClaimVerdict.Honest)
                 checkedResponse = OakToneGuard.Apply(checkedResponse, tone);
             if (tone == OakTone.Kind && Trust.Current >= PraiseCeiling)
-                checkedResponse = new OakResponse(deeds.Count == 0 ? OakToneGuard.PraiseCeilingReply : checkedResponse.Reply, checkedResponse.Action, 0);
+                checkedResponse = new OakResponse(OakDeedCatalog.MissingHints(deeds).Count > 0 ? OakToneGuard.PraiseCeilingReply : checkedResponse.Reply, checkedResponse.Action, 0);
 
             var missing = OakDeedCatalog.MissingHints(deeds);
             var calm = verdict == OakClaimVerdict.Honest && !OakToneGuard.IsAngry(tone);
