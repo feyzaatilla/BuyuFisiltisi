@@ -27,6 +27,7 @@ namespace BuyuFisiltisi.Gameplay.Book
         private string _note = string.Empty;
         private GUIStyle _titleStyle;
         private GUIStyle _textStyle;
+        private GUIStyle _hintStyle;
         private GUIStyle _buttonStyle;
         private GUIStyle _tabStyle;
         private Texture2D _cover;
@@ -127,7 +128,19 @@ namespace BuyuFisiltisi.Gameplay.Book
             if (_textStyle == null)
                 EnsureStyles();
 
-            GUI.Label(new Rect(Screen.width - 260f, 40f, 240f, 26f), "Tab · Büyü Kitabı", _textStyle);
+            if (_hintStyle == null)
+            {
+                _hintStyle = new GUIStyle(GUI.skin.label) { fontSize = 18, fontStyle = FontStyle.Bold, alignment = TextAnchor.LowerRight };
+                _hintStyle.normal.textColor = new Color(1f, 0.93f, 0.7f);
+            }
+
+            var hint = new Rect(Screen.width - 300f, Screen.height - 50f, 280f, 30f);
+            var hintWidth = _hintStyle.CalcSize(new GUIContent("Tab · Büyü Kitabı")).x;
+            var color = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.45f);
+            GUI.DrawTexture(new Rect(hint.xMax - hintWidth - 12f, hint.y, hintWidth + 24f, hint.height), Texture2D.whiteTexture);
+            GUI.color = color;
+            GUI.Label(hint, "Tab · Büyü Kitabı", _hintStyle);
         }
 
         private void DrawCommands(Rect area)

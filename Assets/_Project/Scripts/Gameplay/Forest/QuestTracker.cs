@@ -189,11 +189,26 @@ namespace BuyuFisiltisi.Gameplay.Forest
                 _toastStyle.normal.textColor = new Color(0.6f, 1f, 0.6f);
             }
 
-            var width = Screen.width;
-            GUI.Label(new Rect(0f, Screen.height - 190f, width, 70f), "Görev: " + CurrentText(), _taskStyle);
+            var width = Screen.width * 0.5f;
+            var x = Screen.width * 0.25f;
+            DrawOnPanel(new Rect(x, 18f, width, 56f), "Görev: " + CurrentText(), _taskStyle);
 
             if (Time.unscaledTime < _toastUntil)
-                GUI.Label(new Rect(0f, Screen.height - 240f, width, 50f), _toast, _toastStyle);
+                DrawOnPanel(new Rect(x, 70f, width, 70f), _toast, _toastStyle);
+        }
+
+        private void DrawOnPanel(Rect rect, string text, GUIStyle style)
+        {
+            var content = new GUIContent(text);
+            var size = style.CalcSize(content);
+            var textWidth = Mathf.Min(size.x, rect.width);
+            var textHeight = style.CalcHeight(content, textWidth);
+            var back = new Rect(rect.x + (rect.width - textWidth) * 0.5f - 14f, rect.y - 4f, textWidth + 28f, textHeight + 8f);
+            var old = GUI.color;
+            GUI.color = new Color(0f, 0f, 0f, 0.45f);
+            GUI.DrawTexture(back, Texture2D.whiteTexture);
+            GUI.color = old;
+            GUI.Label(new Rect(back.x + 14f, rect.y, textWidth, textHeight), text, style);
         }
     }
 }
