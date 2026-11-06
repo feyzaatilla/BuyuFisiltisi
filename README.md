@@ -3,8 +3,8 @@
 Kocaeli Üniversitesi, Teknoloji Fakültesi, Bilişim Sistemleri Mühendisliği
 Yazılım Geliştirme Laboratuvarı-I, Proje-1
 
-**Ekip:** İnci Gören, Feyza Atilla
-**Tarih:** Kasım 2026
+Ekip: İnci Gören, Feyza Atilla
+
 
 ## İçindekiler
 
@@ -54,7 +54,7 @@ flowchart LR
 
 ### Gereksinimler
 
-- Unity 6.3 LTS (6000.3.25f1), Universal 3D (URP)
+- Unity 6.3 LTS , Universal 3D (URP)
 - Paketler: AI Navigation, Input System, TextMeshPro, Test Framework
 - [Ollama](https://ollama.com/) ve `gemma2:2b` modeli ([model seçim notu](Docs/model_secimi.md))
 
@@ -326,7 +326,7 @@ Başarısız, süre aşımı ya da iptal olan deneme olmadı. Aynı noktadan yap
 
 `Büyü Fısıltısı/Meşe Diyalog Senaryolarını Çalıştır` menüsü altı senaryoyu gerçek modelle, oyundaki `OakDialogueSession` üzerinden çalıştırır ve sonuçları [Docs/TestResults/mese_diyalog_senaryolari.md](Docs/TestResults/mese_diyalog_senaryolari.md) dosyasına yazar: ikna eden, kızdıran, alakasız konuşan, yalan söyleyen, yol soran ve kibar ama iyiliksiz cadı.
 
-Son çalıştırma (6 Kasım 2026, `gemma2:2b`, sıcaklık 0.7): **14/14 geçerli yanıt**, hiç bozuk JSON yok. Ortalama süre 1042 ms, medyan 899 ms (en kısa 549 ms, en uzun 3264 ms; en uzunu ilk istek).
+ **14/14 geçerli yanıt**, hiç bozuk JSON yok. Ortalama süre 1042 ms, medyan 899 ms (en kısa 549 ms, en uzun 3264 ms; en uzunu ilk istek).
 
 | Senaryo | Örnek cadı sözü | Yaşlı Meşe | Eylem | Güven |
 |---|---|---|---|---|
