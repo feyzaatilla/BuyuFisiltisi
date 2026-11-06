@@ -256,7 +256,7 @@ namespace BuyuFisiltisi.UI.Oak
             if (!session.AddDeed(recorded.Description))
                 return;
 
-            session.Trust.Apply(OakGreeting.DeedBonus(session.Trust));
+            session.Trust.Apply(OakGreeting.DeedBonus(session.Trust, session.Deeds));
             var current = session.Trust.Current;
             Debug.Log($"[Meşe] İyilik öğrendi: {recorded.Description} Güven: {previous} -> {current}", this);
             RefreshTrust();

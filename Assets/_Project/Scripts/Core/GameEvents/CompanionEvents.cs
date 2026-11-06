@@ -29,7 +29,8 @@ namespace BuyuFisiltisi.Core.GameEvents
         Succeeded,
         Failed,
         Cancelled,
-        TimedOut
+        TimedOut,
+        Blocked
     }
 
     /// <summary>

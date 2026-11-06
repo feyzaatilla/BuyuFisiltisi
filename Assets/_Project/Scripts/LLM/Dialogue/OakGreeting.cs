@@ -17,6 +17,11 @@ namespace BuyuFisiltisi.LLM.Dialogue
             return trust.Current + DeedTrustBonus <= MaxDeedTrust ? DeedTrustBonus : 0;
         }
 
+        public static int DeedBonus(OakTrust trust, IReadOnlyCollection<string> deeds)
+        {
+            return OakDeedCatalog.MissingHints(deeds).Count == 0 ? DeedBonus(trust) : 0;
+        }
+
         public static string Build(IReadOnlyList<string> deeds, OakTrust trust)
         {
             var known = new List<string>();

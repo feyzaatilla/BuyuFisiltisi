@@ -15,6 +15,7 @@ namespace BuyuFisiltisi.Tests.EditMode
             public GameObject Self { get; set; }
             public bool HasArrived { get; set; }
             public bool IsStuck { get; set; }
+            public bool IsBlocked { get; set; }
             public bool CanMove { get; set; } = true;
             public int FollowCalls { get; private set; }
             public int StopCalls { get; private set; }
@@ -168,6 +169,30 @@ namespace BuyuFisiltisi.Tests.EditMode
             CollectionAssert.AreEqual(new[] { CompanionTaskOutcome.Failed }, outcomes);
             Assert.AreEqual(CompanionStateId.Waiting, brain.State);
             Assert.AreEqual(0, target.InteractCalls);
+        }
+
+        [Test]
+        public void StuckWithClosedPath_FailsAsBlocked()
+        {
+            brain.Issue(CompanionCommand.InteractWith(target));
+            body.IsStuck = true;
+            body.IsBlocked = true;
+            brain.Tick(0.5f);
+
+            CollectionAssert.AreEqual(new[] { CompanionTaskOutcome.Blocked }, outcomes);
+            Assert.AreEqual(CompanionStateId.Waiting, brain.State);
+            Assert.AreEqual(0, target.InteractCalls);
+        }
+
+        [Test]
+        public void ClosedPathWithoutStuck_KeepsGoing()
+        {
+            brain.Issue(CompanionCommand.InteractWith(target));
+            body.IsBlocked = true;
+            brain.Tick(0.5f);
+
+            Assert.AreEqual(CompanionStateId.GoingToTarget, brain.State);
+            Assert.IsEmpty(outcomes);
         }
 
         [Test]
