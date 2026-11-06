@@ -383,11 +383,13 @@ namespace BuyuFisiltisi.UI.Intro
             _titleStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Bold };
             _titleStyle.normal.textColor = new Color(0.35f, 0.1f, 0.5f);
             _headingStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Bold };
-            _headingStyle.normal.textColor = new Color(0.4f, 0.18f, 0.06f);
+            _headingStyle.normal.textColor = new Color(0.45f, 0.2f, 0.06f);
             _bodyStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true, fontStyle = FontStyle.Italic };
             _bodyStyle.normal.textColor = new Color(0.28f, 0.1f, 0.45f);
             _smallStyle = new GUIStyle(GUI.skin.label) { alignment = TextAnchor.MiddleCenter, wordWrap = true };
             _smallStyle.normal.textColor = new Color(0.45f, 0.32f, 0.22f);
+            foreach (var style in new[] { _titleStyle, _headingStyle, _bodyStyle, _smallStyle })
+                style.hover.textColor = style.active.textColor = style.focused.textColor = style.onNormal.textColor = style.normal.textColor;
         }
     }
 }

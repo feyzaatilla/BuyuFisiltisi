@@ -29,6 +29,49 @@ namespace BuyuFisiltisi.Gameplay.Forest
             _eventBus = eventBus;
         }
 
+        private void Start()
+        {
+            PaintPlatforms();
+        }
+
+        private void PaintPlatforms()
+        {
+            var shader = Shader.Find("Universal Render Pipeline/Unlit");
+            var moss = shader != null ? new Material(shader) : null;
+            if (moss != null)
+                moss.color = new Color(0.36f, 0.62f, 0.42f);
+
+            var block = new MaterialPropertyBlock();
+            foreach (Transform child in transform)
+            {
+                if (child.gameObject.layer != BuyuFisiltisi.Core.Navigation.GameLayers.Ground || child.GetComponent<BoxCollider>() == null)
+                    continue;
+
+                var renderer = child.GetComponent<MeshRenderer>();
+                if (renderer == null)
+                    continue;
+
+                var isWood = child.name.StartsWith("Kayan") || child.name.StartsWith("Kok_");
+                renderer.GetPropertyBlock(block);
+                block.SetColor("_BaseColor", isWood ? new Color(0.62f, 0.4f, 0.22f) : new Color(0.46f, 0.4f, 0.34f));
+                renderer.SetPropertyBlock(block);
+
+                if (isWood || moss == null)
+                    continue;
+
+                var top = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                top.name = "Yosun_Ust";
+                Destroy(top.GetComponent<Collider>());
+                top.transform.SetParent(child, false);
+                var scale = child.lossyScale;
+                top.transform.localPosition = new Vector3(0f, 0.5f + 0.01f / Mathf.Max(scale.y, 0.01f), 0f);
+                top.transform.localScale = new Vector3(1f - 0.3f / Mathf.Max(scale.x, 0.01f), 0.02f / Mathf.Max(scale.y, 0.01f), 1f - 0.3f / Mathf.Max(scale.z, 0.01f));
+                var topRenderer = top.GetComponent<MeshRenderer>();
+                topRenderer.sharedMaterial = moss;
+                topRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            }
+        }
+
         private void Update()
         {
             UpdateJumpBoost();
